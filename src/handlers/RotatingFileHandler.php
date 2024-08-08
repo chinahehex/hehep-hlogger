@@ -62,7 +62,7 @@ abstract class RotatingFileHandler extends FileHandler
             $tagname = '<'.$matches[1] . $tagIndex . '>';
             $tagIndex++;
             return $tagname;
-        },$this->fileFormat);
+        },$this->filefmt);
 
         if (preg_match_all(self::TPL_REGEX, $this->filefmt, $matches, PREG_OFFSET_CAPTURE | PREG_SET_ORDER)) {
             foreach ($matches as $index=>$param) {

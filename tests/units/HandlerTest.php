@@ -64,7 +64,7 @@ class HandlerTest extends TestCase
 
         $logger = $this->logManager->getLogger('admin');
         $byteRotatingFileHandler = $logger->byteRotatingFileHandler($this->file,10);
-        $byteRotatingFileHandler->setFileFormat('{date:Ym/d/H}/{filename}_{date:YmdHis}_{rand:6}');
+        $byteRotatingFileHandler->setFilefmt('{date:Ym/d/H}/{filename}_{date:YmdHis}_{rand:6}');
         $logger->addHandler($byteRotatingFileHandler);
         $logger->setFormatter($logger->lineFormatter('{date:Y-m-d:H:i},{level},{msg} ,file:{file}, line:{line} {n}'));
 

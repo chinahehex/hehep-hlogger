@@ -1,5 +1,5 @@
 <?php
-namespace hehe\core\hlogger\contexts;
+namespace hehe\core\hlogger\base;
 
 /**
  * 上下文类

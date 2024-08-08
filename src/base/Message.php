@@ -1,7 +1,6 @@
 <?php
 namespace hehe\core\hlogger\base;
 
-use hehe\core\hlogger\contexts\Context;
 
 /**
  * 消息日志类
