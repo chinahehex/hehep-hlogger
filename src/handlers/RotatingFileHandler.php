@@ -26,15 +26,15 @@ abstract class RotatingFileHandler extends FileHandler
      * 轮转文件格式
      * @var string
      */
-    protected $fileFormat = '{filename}_{date:YmdHis}_{rand:6}';
+    protected $filefmt = '{filename}_{date:YmdHis}_{rand:6}';
 
     /**
      * 轮转文件格式变量
      * @var array
      */
-    protected $fileFormatVars = [];
+    protected $filefmtVars = [];
 
-    protected $fileReplaceTemplate = '';
+    protected $filefmtReplaceTemplate = '';
 
     public function __construct(string $logFile = '',array $propertys = [])
     {
@@ -42,9 +42,9 @@ abstract class RotatingFileHandler extends FileHandler
 
     }
 
-    public function setFileFormat(string $fileFormat):void
+    public function setFilefmt(string $filefmt):void
     {
-        $this->fileFormat = $fileFormat;
+        $this->filefmt = $filefmt;
     }
 
     /**
@@ -58,13 +58,13 @@ abstract class RotatingFileHandler extends FileHandler
     {
         $matches = [];
         $tagIndex = 0;
-        $this->fileReplaceTemplate = preg_replace_callback(self::TPL_REGEX,function($matches) use (&$tagIndex){
+        $this->filefmtReplaceTemplate = preg_replace_callback(self::TPL_REGEX,function($matches) use (&$tagIndex){
             $tagname = '<'.$matches[1] . $tagIndex . '>';
             $tagIndex++;
             return $tagname;
         },$this->fileFormat);
 
-        if (preg_match_all(self::TPL_REGEX, $this->fileFormat, $matches, PREG_OFFSET_CAPTURE | PREG_SET_ORDER)) {
+        if (preg_match_all(self::TPL_REGEX, $this->filefmt, $matches, PREG_OFFSET_CAPTURE | PREG_SET_ORDER)) {
             foreach ($matches as $index=>$param) {
                 $name = $param[1][0];
                 if (isset($param[2][0])) {
@@ -75,7 +75,7 @@ abstract class RotatingFileHandler extends FileHandler
                 // 判断是否有参数
                 $tagName = '<' .$name . $index .  '>';
 
-                $this->fileFormatVars[] = [$name,$tagName,$func_params];
+                $this->filefmtVars[] = [$name,$tagName,$func_params];
             }
         }
     }
@@ -87,7 +87,7 @@ abstract class RotatingFileHandler extends FileHandler
      */
     protected function getNextRotateFile(string $filePath,Message $message):string
     {
-        if ($this->fileReplaceTemplate === '') {
+        if ($this->filefmtReplaceTemplate === '') {
             $this->parseRotateFileTemplate();
         }
 
@@ -105,7 +105,7 @@ abstract class RotatingFileHandler extends FileHandler
     protected function replaceRotateFileTemplate(string $filename,Message $message):string
     {
         $replaceParams = [];
-        foreach ($this->fileFormatVars as $tag) {
+        foreach ($this->filefmtVars as $tag) {
             list($name,$key,$value) = $tag;
             if ($name === 'filename') {
                 $replaceParams[$key] = $filename;
@@ -131,7 +131,7 @@ abstract class RotatingFileHandler extends FileHandler
             }
         }
 
-        return  strtr($this->fileReplaceTemplate, $replaceParams);
+        return  strtr($this->filefmtReplaceTemplate, $replaceParams);
     }
 
 

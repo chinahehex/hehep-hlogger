@@ -4,9 +4,14 @@
 - hehep-hlogger 是一个PHP 日志工具组件
 - 支持处理器、过滤器、格式器、上下文
 ## 安装
-- 直接下载:
+- **gitee下载**:
+```
+git clone git@gitee.com:chinahehex/hehep-hlogger.git
 ```
 
+- **github下载**:
+```
+git clone git@github.com:chinahehex/hehep-hlogger.git
 ```
 - 命令安装：
 ```
@@ -302,12 +307,12 @@ class FileHandler extends LogHandler
     }
 
     // 同时处理多条日志消息
-//    public function handleMessages(array $messages)
-//    {
-//        foreach ($messages as $message) {
-//            $this->handleMessage($message);
-//        }
-//    }
+    public function handleMessages(array $messages)
+    {
+        foreach ($messages as $message) {
+            $this->handleMessage($message);
+        }
+    }
 
     // 处理日志消息
     public function handleMessage(Message $message):void
@@ -360,7 +365,6 @@ $logger = $hlog->newLogger();
 $handler = $hlog->fileHandler('/home/hehe/www/logs/hehep.log');
 $handler = $hlog->fileHandler([
     'logFile'=>'/home/hehe/www/logs/hehep.log',
-    'logDir'=>'',// 新文件目录, 默认为空,则使用logFile的目录
     'useLock'=>false,// 是否使用文件锁(flock),默认为false
 ]);
 
@@ -376,7 +380,7 @@ $logger->info('info log message');
 属性:
 'logFile'=>'',// 日志文件
 'maxByte'=>0,// 最大文件容量,单kb,日志文件超过该值时,将创建新的日志文件
-'fileFormat'=>'{filename}_{date:YmdHis}_{rand:6}',// filename:当前日志文件名 ,date:为当前日期,"YmdHis" 日期格式,rand:为6位随机数
+'filefmt'=>'{filename}_{date:YmdHis}_{rand:6}',// filename:当前日志文件名 ,date:为当前日期,"YmdHis" 日期格式,rand:为6位随机数
 
 ```
 
@@ -393,7 +397,7 @@ $handler = $hlog->byteRotatingFileHandler([
     // 最大文件容量,单kb,5M
     'maxByte'=>1024 * 5,
     // filename:当前日志文件名 ,date:为当前日期,"YmdHis" 日期格式,rand:为6位随机数
-    'fileFormat'=>'{filename}_{date:YmdHis}_{rand:6}',
+    'filefmt'=>'{filename}_{date:YmdHis}_{rand:6}',
 ]);
 
 $logger->addHandler($handler);

@@ -137,16 +137,16 @@ class LogTest extends TestCase
 
     public function testAddFormatter()
     {
-        Log::setFormatter('dev',['tpl'=>'{date:Y-m-d:H:i},{level;} ,file:{file}, line:{line} {n}']);
-        Log::setFilter('dev',[
+        Log::setFormatter(['tpl'=>'{date:Y-m-d:H:i},{level;} ,file:{file}, line:{line} {n}'],'dev');
+        Log::setFilter([
             'levels'=>['error','warning'],
-        ]);
+        ],'dev');
 
-        Log::setHandler('dev',[
+        Log::setHandler([
             'logFile'=>$this->file,
             'formatter'=>'dev',
             'filters'=>['dev']
-        ]);
+        ],'dev');
 
         $logger = Log::getLogger('dev');
         $logger->addHandler('dev');

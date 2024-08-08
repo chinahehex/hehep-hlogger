@@ -230,11 +230,6 @@ class Logger
         $this->log(Log::DEBUG,$message,$context);
     }
 
-    public function exception(string $message, array $context = array()):void
-    {
-        $this->log(Log::EXCEPTION,$message,$context);
-    }
-
     public function addHandler($handler = ''):LogHandler
     {
         if (is_string($handler) ||  is_array($handler)) {

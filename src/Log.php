@@ -43,7 +43,6 @@ class Log
     const NOTICE    = LogLevel::NOTICE;// 普通但是重要的事件。
     const INFO      = LogLevel::INFO; // 关键事件
     const DEBUG     = LogLevel::DEBUG;// 详细的debug信息
-    const EXCEPTION = 'exception';
 
     /**
      * 默认日志记录器
