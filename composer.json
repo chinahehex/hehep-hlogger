@@ -1,0 +1,24 @@
+{
+	"name": "hehex/hehep-hlogger",
+	"description": "hehep-hlogger 是一个PHP 日志工具组件,支持处理器、过滤器、格式器、上下文",
+	"license": "Apache-2.0",
+	"authors": [
+		{
+			"name": "hehe"
+		}
+	],
+	"require": {
+		"php": ">=7.1",
+		"psr/log": "^1.1"
+	},
+	"autoload": {
+		"psr-4": {
+			"hlogger\\": "src/"
+		}
+	},
+	"autoload-dev": {
+		"psr-4": {
+			"hlogger\\test": "tests/"
+		}
+	}
+}
