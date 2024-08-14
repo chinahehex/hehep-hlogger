@@ -154,7 +154,7 @@ use hehe\core\hlogger\Log;
 $hlog = new LogManager([]);
 
 // 设置默认"default"处理器参数
-$hlog->setHandler(['logFile'=>'/home/hehe/www/logs/xxxx.log']);
+$hlog->setHandler('default',['logFile'=>'/home/hehe/www/logs/xxxx.log']);
 
 
 // 设置名称为“hehe”格式器
