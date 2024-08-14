@@ -1,5 +1,4 @@
 <?php
-
 namespace hehe\core\hlogger;
 
 use hehe\core\hlogger\base\LogContext;
@@ -7,7 +6,6 @@ use hehe\core\hlogger\base\LogFilter;
 use hehe\core\hlogger\base\LogFormatter;
 use hehe\core\hlogger\base\Logger;
 use hehe\core\hlogger\base\LogHandler;
-use Psr\Log\LogLevel;
 
 /**
  * @method static Logger getDefaultLogger()
@@ -26,23 +24,24 @@ use Psr\Log\LogLevel;
  * @method static void debug(string $message, array $context = [])
  * @method static void notice(string $message, array $context = [])
  * @method static void log(string $level,string $message,array $context = [])
- * @method static self setFormatter(array $attrs = [],string $name = 'default',bool $append = true)
- * @method static self setFilter(array $attrs = [],string $name = 'default',bool $append = true)
- * @method static self setHandler(array $attrs = [],string $name = 'default',bool $append = true)
- * @method static self setContext(array $attrs = [],string $name = 'default',bool $append = true)
+ * @method static self setFormatter(string $name = '',array $attrs = [],bool $append = true)
+ * @method static self setFilter(string $name = '',array $attrs = [],bool $append = true)
+ * @method static self setHandler(string $name = '',array $attrs = [],bool $append = true)
+ * @method static self setContext(string $name = '',array $attrs = [],bool $append = true)
+ * @method static self setLogger(string $name = '',array $attrs = [],bool $append = true)
  *
  */
 class Log
 {
 
-    const EMERGENCY = LogLevel::EMERGENCY;// 系统不可用
-    const ALERT     = LogLevel::ALERT;
-    const CRITICAL  = LogLevel::CRITICAL;// 严重错误
-    const ERROR     = LogLevel::ERROR;// 运行时错误，但是不需要立刻处理。
-    const WARNING   = LogLevel::WARNING;// 出现非错误的异常
-    const NOTICE    = LogLevel::NOTICE;// 普通但是重要的事件。
-    const INFO      = LogLevel::INFO; // 关键事件
-    const DEBUG     = LogLevel::DEBUG;// 详细的debug信息
+    const EMERGENCY = 'emergency';// 系统不可用
+    const ALERT     = 'alert';
+    const CRITICAL  = 'critical';// 严重错误
+    const ERROR     = 'error';// 运行时错误，但是不需要立刻处理。
+    const WARNING   = 'warning';// 出现非错误的异常
+    const NOTICE    = 'notice';// 普通但是重要的事件。
+    const INFO      = 'info'; // 关键事件
+    const DEBUG     = 'debug';// 详细的debug信息
 
     /**
      * 默认日志记录器

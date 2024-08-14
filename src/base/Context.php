@@ -1,6 +1,8 @@
 <?php
 namespace hehe\core\hlogger\base;
 
+use hehe\core\hlogger\contexts\WebContext;
+
 /**
  * 上下文类
  */
@@ -11,6 +13,18 @@ class Context
     public function __construct(array $ctx = [])
     {
         $this->ctx = $ctx;
+    }
+
+    /**
+     * @param string $name 名称
+     * @param string|array|\Closure $value 值
+     * @return $this
+     */
+    public function addValue(string $name,$value = ''):self
+    {
+        $this->ctx[$name] = $value;
+
+        return $this;
     }
 
     /**
@@ -50,6 +64,15 @@ class Context
         }
 
         return $ctx;
+    }
+
+    public function getExtra():array
+    {
+        if (isset($this->ctx['extra'])) {
+            return $this->ctx['extra'];
+        } else {
+            return [];
+        }
     }
 
 }

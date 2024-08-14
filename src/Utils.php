@@ -5,6 +5,15 @@ use hehe\core\hlogger\contexts\TraceContext;
 
 class Utils
 {
+    const TPL_REGEX = '/\{([a-zA-Z0-9]+):?([^\}]+)?\}/';
+
+    /**
+     * 创建实例
+     * 用于创建处理器 ,过滤器，格式器，上下文对象
+     * @param string $class
+     * @param array $params
+     * @return mixed
+     */
     public static function newInstance(string $class, array $params = [])
     {
         $parameters = static::getConstructor($class);
@@ -91,6 +100,80 @@ class Utils
         }
 
         return $categoryList;
+    }
+
+    /**
+     * 解析模板
+     * @param string $template 模版字符串
+     * @return array<替换模板, 模板变量>
+     */
+    public static function parseTemplate(string $template):array
+    {
+        $matches = [];
+        $tagIndex = 0;
+        $replaceTemplate = preg_replace_callback(self::TPL_REGEX,function($matches) use (&$tagIndex){
+            $tagname = '<'.$matches[1] . $tagIndex . '>';
+            $tagIndex++;
+            return $tagname;
+        },$template);
+
+        $templateVars = [];
+        if (preg_match_all(self::TPL_REGEX, $template, $matches, PREG_OFFSET_CAPTURE | PREG_SET_ORDER)) {
+            foreach ($matches as $index=>$param) {
+                $name = $param[1][0];
+                if (isset($param[2][0])) {
+                    $func_params = explode(',',$param[2][0]);
+                } else {
+                    $func_params = [];
+                }
+                // 判断是否有参数
+                $tagName = '<' .$name . $index .  '>';
+                $templateVars[] = [$name,$tagName,$func_params];
+            }
+        }
+
+        return [$replaceTemplate,$templateVars];
+    }
+
+    /**
+     * 获取指定目录下的所有文件
+     * @param string $path
+     * @param string $pattern 匹配正则
+     * @return array
+     */
+    public static function getFiles(string $path,string $pattern = ''):array
+    {
+        if (!is_dir($path)) {
+            return [];
+        }
+
+        $files = new \RecursiveIteratorIterator(
+            new \RecursiveDirectoryIterator($path, \RecursiveDirectoryIterator::SKIP_DOTS),
+            \RecursiveIteratorIterator::CHILD_FIRST
+        );
+
+        $logFiles = [];
+        if ($pattern !== '') {
+            foreach ($files as $file) {
+                if ($file->isDir()) {
+                    continue;
+                }
+
+                if (preg_match($pattern, $file->getFilename())) {
+                    $logFiles[] = $file->getPathname();
+                }
+            }
+        } else {
+            foreach ($files as $file) {
+                if ($file->isDir()) {
+                    continue;
+                }
+
+                $logFiles[] = $file->getPathname();
+            }
+        }
+
+        return $logFiles;
     }
 
 }

@@ -10,6 +10,12 @@ class ByteRotatingFileHandler extends RotatingFileHandler
 {
 
     /**
+     * 轮转文件格式
+     * @var string
+     */
+    protected $rotatefmt = '{filename}';
+
+    /**
      * 文件最大大小
      *<B>说明：</B>
      *<pre>
@@ -34,25 +40,18 @@ class ByteRotatingFileHandler extends RotatingFileHandler
         $this->maxByte = $maxByte;
     }
 
-    protected function initRotate(Message $message)
-    {
-        $this->rotatFile = $this->getNextRotateFile($this->logFile,$message);
-        $this->dirCreated = false;
-    }
-
     public function rotate(Message $message):void
     {
-
-        if ($this->rotatFile === '') {
-            $this->initRotate($message);
+        if ($this->rotateFile === '') {
+            $this->rotateFile($message);
         }
 
-        // 换算字节单位B
-        $maxByte = $this->maxByte * 1024;
         // 清除缓存，防止统计文件大小错误
         clearstatcache();
-        if (@filesize($this->rotatFile) > $maxByte) {
-            $this->initRotate($message);
+        if (@filesize($this->rotateFile) > ($this->maxByte * 1024)) {
+            // 备份文件
+            $this->backupFile($message);
+            $this->rotateFile($message);
         }
 
         return ;

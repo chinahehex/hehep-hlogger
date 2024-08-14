@@ -152,17 +152,17 @@ class ExampleTest extends TestCase
 
     public function testAddFormatter()
     {
-        $this->logManager->setFormatter(['tpl'=>'{date:Y-m-d:H:i},{level} ,file:{file}, line:{line} {n}'],'dev');
+        $this->logManager->setFormatter('dev',['tpl'=>'{date:Y-m-d:H:i},{level} ,file:{file}, line:{line} {n}']);
 
-        $this->logManager->setFilter([
+        $this->logManager->setFilter('dev',[
             'levels'=>['error','warning'],
-        ],'dev');
+        ]);
 
-        $this->logManager->setHandler([
+        $this->logManager->setHandler('dev',[
             'logFile'=>$this->file,
             'formatter'=>'dev',
             'filters'=>['dev']
-        ],'dev');
+        ]);
 
         $logger = $this->logManager->getLogger('dev');
         $logger->addHandler('dev');

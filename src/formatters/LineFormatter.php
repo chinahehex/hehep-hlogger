@@ -7,9 +7,6 @@ use hehe\core\hlogger\Utils;
 
 class LineFormatter extends LogFormatter
 {
-    const TPL_REGEX = '/\{([a-zA-Z]+):?([^\}]+)?\}/';
-    const TPL_REPLACE_CHAR = '%';
-
 
     /**
      * 消息模板
@@ -79,27 +76,7 @@ class LineFormatter extends LogFormatter
      */
     protected function parseTemplate():void
     {
-        $matches = [];
-        $tagIndex = 0;
-        $this->replaceTpl = preg_replace_callback(self::TPL_REGEX,function($matches) use (&$tagIndex){
-            $tagname = '<'.$matches[1] . $tagIndex . '>';
-            $tagIndex++;
-            return $tagname;
-        },$this->tpl);
-
-        if (preg_match_all(self::TPL_REGEX, $this->tpl, $matches, PREG_OFFSET_CAPTURE | PREG_SET_ORDER)) {
-            foreach ($matches as $index=>$param) {
-                $name = $param[1][0];
-                if (isset($param[2][0])) {
-                    $func_params = explode(',',$param[2][0]);
-                } else {
-                    $func_params = [];
-                }
-
-                $tagName = '<' .$name . $index .  '>';
-                $this->tplVars[] = [$name,$tagName,$func_params];
-            }
-        }
+        list($this->replaceTpl,$this->tplVars) = Utils::parseTemplate($this->tpl);
     }
 
     /**

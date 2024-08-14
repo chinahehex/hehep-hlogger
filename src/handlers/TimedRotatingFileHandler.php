@@ -15,93 +15,114 @@ class TimedRotatingFileHandler extends RotatingFileHandler
      * 轮转格式
      * @var string
      */
-    protected $rotateFormat = 'M';
+    protected $rotateMode = 'M';
 
     protected $interval = 0;
 
-    protected $rotateDateFormat = 'Y-m-d';
+    protected $startDate = null;
 
-    protected $nowRotateDate = null;
+    protected $endDate = null;
 
-    protected $nextRotateDate = null;
+    /**
+     * 文件最大大小
+     *<B>说明：</B>
+     *<pre>
+     * 单位kb
+     *</pre>
+     * @var int
+     */
+    protected $maxByte = 0;
 
-
-    public function __construct(string $logFile = '',string $rotateFormat = '',int $interval = 0,array $propertys = [])
+    public function __construct(string $logFile = '',string $rotateMode = '',int $interval = 0,array $propertys = [])
     {
-        $this->rotateFormat = $rotateFormat;
+        $this->rotateMode = $rotateMode;
         $this->interval = $interval;
 
         parent::__construct($logFile,$propertys);
     }
 
-    protected function reRotateFile(Message $message)
+    public function setRotateMode(string $rotateMode):void
     {
-        if (is_null($nowRotateDate)) {
-            $this->nowRotateDate = new \DateTime('now');
-            $this->nextRotateDate = $this->buildNextRotateDate($this->nowRotateDate);
-        }
-
-        $msgDatetime = $message->getDateTime();
-        if ($msgDatetime > $this->nextRotateDate) {
-            $this->nowRotateDate = $msgDatetime;
-        }
-
-        // 生成
-        $fileDir = dirname($this->logFile);
-
-        // 生成旋转日期目录
-        $rotateDateArr = explode(' ',date($this->rotateDateFormat,microtime(true));
-
-        $rotateDir = '';
-        $rotateDir = str_replace('-','/',$rotateDateArr[0]);
-        if (isset($rotateDateArr[1])) {
-            $rotateDir = $rotateDir . '/' . str_replace(':','/',$rotateDateArr[1]);
-        }
-
-        $this->logFile = $fileDir . '/' . $rotateDir . '/' . basename($this->logFile);
+        $this->rotateMode = $rotateMode;
     }
 
-    protected function getNextRotateFile(Message $message):DateTime
+    /**
+     * @param int $maxByte
+     */
+    public function setMaxByte(int $maxByte): void
     {
-        //  ‘S’、‘M’、‘H’、‘D’、‘W’ 和 ‘midnight’
+        $this->maxByte = $maxByte;
+    }
+
+    /**
+     * 重置轮转时间
+     */
+    protected function resetRouteDate()
+    {
+        //  ‘S’、‘M’、‘H’、‘D’、‘W’ 、‘Y’
         // 转大写
-        $dateType = strtoupper($this->rotateFormat);
-        $mdatetime = $message->getDateTime();
-        
-        if ($dateType === 'D') {
+        $rotateMode = strtoupper($this->rotateMode);
+        $nowRotateDate = new \DateTime('now');
+
+        if ($rotateMode === 'D') {
             // 天
-            $nowRotateDate->modify('+1 day');
-        } else if ($dateType === 'H') {
+            $startDate = (new \DateTime())->setTimestamp(strtotime("today"));
+            $endDate = (new \DateTime())->setTimestamp( strtotime("tomorrow -1 second"));
+        } else if ($rotateMode === 'H') {
             // 小时
-            $nowRotateDate->modify('+1 hour');
-        } else if ($dateType === 'W') {
+            $startDate = (new \DateTime())->setTimestamp(strtotime(date('Y-m-d H:00:00', $nowRotateDate->getTimestamp())));
+            $endDate = (new \DateTime())->setTimestamp(strtotime(date('Y-m-d H:59:59', $nowRotateDate->getTimestamp())));
+        } else if ($rotateMode === 'S') {
+            // 分钟
+            $startDate = (new \DateTime())->setTimestamp(strtotime(date('Y-m-d H:i:00', $nowRotateDate->getTimestamp())));
+            $endDate = (new \DateTime())->setTimestamp(strtotime(date('Y-m-d H:i:59', $nowRotateDate->getTimestamp())));
+        } else if ($rotateMode === 'W') {
             // 周
-            $nowRotateDate->modify('+1 hour');
-        } else if ($dateType === 'M') {
+            $startDate = (new \DateTime())->setTimestamp(strtotime('monday this week 00:00:00', $nowRotateDate->getTimestamp()));
+            $endDate = (new \DateTime())->setTimestamp(strtotime('monday next week 00:00:00', $nowRotateDate->getTimestamp()) - 1);
+        } else if ($rotateMode === 'M') {
             // 月
-            $nowRotateDate->modify('+1 month');
-        } else if ($dateType === 'Y') {
+            $startDate = (new \DateTime())->setTimestamp(strtotime(date('Y-m-01 00:00:00')));
+            $endDate = (new \DateTime())->setTimestamp(strtotime(date('Y-m-t 23:59:59')));
+        } else if ($rotateMode === 'Y') {
             // 年
-            $nowRotateDate->modify('+1 year');
+            $currentYear = date("Y");
+            // 获取当前年份的起始时间（年份开始的第一天，通常是1月1日）
+            $startOfYear = strtotime("{$currentYear}-01-01 00:00:00");
+            // 获取当前年份的结束时间（下一年的第一天，减去一秒得到本年的最后一秒）
+            $endOfYear = strtotime("+1 year", $startOfYear) - 1;
+            $startDate = (new \DateTime())->setTimestamp($startOfYear);
+            $endDate = (new \DateTime())->setTimestamp($endOfYear);
         }
 
-        return $nextDateTime;
+        $this->startDate = $startDate;
+        $this->endDate = $endDate;
+    }
+
+    protected function rotateFile(Message $message)
+    {
+        $this->resetRouteDate();
+        parent::rotateFile($message);
     }
 
     public function rotate(Message $message):void
     {
-
-        if ($this->rotatFile === '') {
-            $this->rotatFile = $this->getNextRotateFile($this->logFile,$message);
+        // 第一次轮转，初始化轮转时间，轮转文件
+        if ($this->rotateFile === '') {
+            $this->rotateFile($message);
         }
 
-        // 换算字节单位B
-        $maxByte = $this->maxByte * 1024;
-        // 清除缓存，防止统计文件大小错误
-        clearstatcache();
-        if (@filesize($this->rotatFile) > $maxByte) {
-            $this->rotatFile = $this->getNextRotateFile($this->logFile);
-            $this->dirCreated = false;
+        if ($message->getDataTime() > $this->endDate) {
+            $this->rotating = true;
+            $this->rotateFile($message);
+        }
+
+        // 备份轮转文件
+        if ($this->rotating === false && $this->maxByte > 0) {
+            clearstatcache();
+            if (@filesize($this->rotateFile) > ($this->maxByte * 1024)) {
+                $this->backupFile($message);
+            }
         }
 
         return ;

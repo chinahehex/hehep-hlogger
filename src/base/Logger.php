@@ -1,11 +1,13 @@
 <?php
 namespace hehe\core\hlogger\base;
 
+use hehe\core\hlogger\contexts\SysContext;
 use hehe\core\hlogger\contexts\TraceContext;
 use hehe\core\hlogger\filters\LevelFilter;
 use hehe\core\hlogger\formatters\LineFormatter;
 use hehe\core\hlogger\handlers\ByteRotatingFileHandler;
 use hehe\core\hlogger\handlers\FileHandler;
+use hehe\core\hlogger\handlers\TimedRotatingFileHandler;
 use hehe\core\hlogger\Log;
 use hehe\core\hlogger\LogManager;
 use hehe\core\hlogger\Utils;
@@ -17,6 +19,7 @@ use hehe\core\hlogger\Utils;
  *</pre>
  * @method FileHandler fileHandler(string $logFile = '')
  * @method ByteRotatingFileHandler byteRotatingFileHandler(string $logFile = '',int $maxByte = 0)
+ * @method TimedRotatingFileHandler timedRotatingFileHandler(string $logFile = '',string $rotateMode = '',int $interval = 0)
  * @method LineFormatter lineFormatter(string $tpl = '')
  * @method LevelFilter  levelFilter(string $levels  = '')
  */
@@ -104,6 +107,17 @@ class Logger
      */
     protected $contexts = [];
 
+    protected $defaultContextInit = false;
+
+    /**
+     * 默认日志上下文
+     * @var string[]
+     */
+    protected $defaultContexts = [
+        TraceContext::class,
+        SysContext::class
+    ];
+
     /**
      * @var LogManager
      */
@@ -126,11 +140,9 @@ class Logger
             });
         }
 
+
         $this->setLevel($this->levels);
         $this->setCategory($this->categorys);
-
-        // 格式化日志上下文
-//        $this->contexts = Utils::buildContexts($this->contexts);
     }
 
     /**
@@ -230,6 +242,29 @@ class Logger
         $this->log(Log::DEBUG,$message,$context);
     }
 
+    /**
+     * 添加日志消息
+     *<B>说明：</B>
+     *<pre>
+     * 略
+     *</pre>
+     * @param string $level 日志级别
+     * @param string $message 日志内容
+     * @param array $context 日志上下文
+     */
+    public function log(string $level, string $message,array $context = []):void
+    {
+        $options = [
+            'msg'=>$message,
+            'level'=>$level,
+            'context'=>$this->getMsgContext($context),
+            'formatter'=>$this->formatter
+        ];
+
+        $message = new Message($options);
+        $this->addMessage($message);
+    }
+
     public function addHandler($handler = ''):LogHandler
     {
         if (is_string($handler) ||  is_array($handler)) {
@@ -276,29 +311,13 @@ class Logger
         return $this;
     }
 
-
-    /**
-     * 添加日志消息
-     *<B>说明：</B>
-     *<pre>
-     * 略
-     *</pre>
-     * @param string $level 日志级别
-     * @param string $message 日志内容
-     * @param array $context 日志上下文
-     */
-    public function log(string $level, string $message,array $context = []):void
+    public function close()
     {
-        $context = $this->formatContext($context);
-        $options = [
-            'msg'=>$message,
-            'level'=>$level,
-            'context'=>$context,
-            'formatter'=>$this->formatter
-        ];
-
-        $message = new Message($options);
-        $this->addMessage($message);
+        foreach ($this->handlers as $handler) {
+            if (method_exists($handler, 'close')) {
+                $handler->close();
+            }
+        }
     }
 
     public function addMessage(Message $message):void
@@ -428,6 +447,40 @@ class Logger
         }
     }
 
+    protected function initDefaultContexts():void
+    {
+        if ($this->defaultContextInit) {
+            return ;
+        }
+
+        $defaultContextStatus = [];
+        // 创建默认上下文对象
+        foreach ($this->defaultContexts as $index=>$ctxClass) {
+            if (!is_object($ctxClass)) {
+                $this->defaultContexts[$index] = new $ctxClass();
+            }
+            $defaultContextStatus[$index] = false;
+        }
+
+        foreach ($this->contexts as $context) {
+            foreach ($this->defaultContexts as $index=>$ctx) {
+                $ctxClass = get_class($ctx);
+                if ($context instanceof $ctxClass) {
+                    $defaultContextStatus[$index] = true;
+                    break;
+                }
+            }
+        }
+
+        foreach ($defaultContextStatus as $index=>$status) {
+            if (!$status) {
+                array_push($this->contexts,$this->defaultContexts[$index]);
+            }
+        }
+
+        $this->defaultContextInit = true;
+    }
+
     /**
      * 格式化上下文
      *<B>说明：</B>
@@ -435,36 +488,26 @@ class Logger
      * 略
      *</pre>
      */
-    protected function formatContext(array $extra = []):array
+    protected function getMsgContext(array $extra = []):Context
     {
+        $this->initDefaultContexts();
 
         $ctx = [
             'extra'=>$extra,
         ];
-
-        $hasTraceContext = false;
-
-        foreach ($this->contexts as $call) {
-            if ($call instanceof TraceContext) {
-                $hasTraceContext = true;
-            }
-
-            if ($call instanceof LogContext) {
-                $vars = $call->handle();
-            } else if ($call instanceof \Closure) {
-                $vars = call_user_func($call);
+        foreach ($this->contexts as $context) {
+            if ($context instanceof LogContext) {
+                $vars = $context->handle();
+            } else if ($context instanceof \Closure) {
+                $vars = call_user_func($context);
             } else {
-                $vars = $call;
+                $vars = $context;
             }
 
             $ctx = array_merge($ctx,$vars);
         }
 
-        if (!$hasTraceContext) {
-            $ctx = array_merge($ctx,$this->logManager->newContext()->handle());
-        }
-
-        return $ctx;
+        return new Context($ctx);
     }
 
     public function __call($method, $params)

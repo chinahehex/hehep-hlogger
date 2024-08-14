@@ -153,31 +153,31 @@ $hlog->setHandler(['logFile'=>'/home/hehe/www/logs/xxxx.log']);
 
 
 // 设置名称为“hehe”格式器
-$hlog->setFormatter([
+$hlog->setFormatter('hehe',[
     'class'=>'lineFormatter',
     'tpl'=>'{date:Y-m-d:H:i} :{msg},file:{file}, line:{line},{class}->{fn} {cate} {n}'
-],'hehe');
+]);
 
 // 设置名称为“hehe”日志过滤器
-$hlog->setFilter([
+$hlog->setFilter('hehe',[
     'levels'=>'error,info',
     'categorys'=>'admin\controller*',
-],'hehe');
+]);
 
 // 设置名称为“hehe”日志处理器
-$hlog->setHandler([
+$hlog->setHandler('hehe',[
     'class'=>'FileHandler',
     'logFile'=>'/home/hehe/www/logs/xxxx.log',
     'formatter'=>'hehe',
     //'filter'=>'hehe'
-],'hehe');
+]);
 
 // 设置名称为“hehe”日志记录器
-$hlog->setLogger([
+$hlog->setLogger('hehe',[
     'handlers'=>'hehe',
     'filters'=>'hehe',
     'levels'=>'error,info',
-],'hehe');
+]);
 
 // 获取预定义hehe日志记录器单例对象
 $heheLogger = $hlog->getLogger('hehe');
@@ -191,9 +191,7 @@ $heheLogger->error('error log message');
 
 ```
 
-
 ## 日志记录器
-
 - 说明
 ```
 日志记录器类:hehe\core\hlogger\base\Logger
@@ -376,11 +374,15 @@ $logger->info('info log message');
 #### 文件大小轮转处理器
 - 说明
 ```
-基类:hehe\core\hlogger\handlers\ByteRotatingFileHandler, 继承自FileHandler
+类名:hehe\core\hlogger\handlers\ByteRotatingFileHandler, 继承自RotatingFileHandler
 属性:
 'logFile'=>'',// 日志文件
 'maxByte'=>0,// 最大文件容量,单kb,日志文件超过该值时,将创建新的日志文件
-'filefmt'=>'{filename}_{date:YmdHis}_{rand:6}',// filename:当前日志文件名 ,date:为当前日期,"YmdHis" 日期格式,rand:为6位随机数
+'rotatefmt'=>'{filename}_{date:YmdHis}_{rand:6}',// 轮转文件格式,变量可以取自日志上下文, filename:当前日志文件名 ,date:为当前日期,"YmdHis" 日期格式,rand:为6位随机数
+'rotatefmtParams'=>['filename'=>'\w+'],// 轮转文件格式参数,可设置变量的正则表达式
+'backupCount'=>0,// 最大备份文件数量,默认为0,表示不限制
+'backupfmt'=>'{filename}_up{index}',// 备份文件格式,变量可以取自日志上下文, filename:当前轮转文件名 ,index:自增序号 日期格式
+'backupfmtParams'=>['index'=>'\d+'],// 备份文件格式参数,可设置变量的正则表达式
 
 ```
 
@@ -397,12 +399,45 @@ $handler = $hlog->byteRotatingFileHandler([
     // 最大文件容量,单kb,5M
     'maxByte'=>1024 * 5,
     // filename:当前日志文件名 ,date:为当前日期,"YmdHis" 日期格式,rand:为6位随机数
-    'filefmt'=>'{filename}_{date:YmdHis}_{rand:6}',
+    'rotatefmt'=>'{filename}_{date:YmdHis}_{rand:6}',
 ]);
 
 $logger->addHandler($handler);
 
 $logger->info('info log message');
+```
+
+#### 文件日期轮转处理器
+- 说明
+```
+类名:hehe\core\hlogger\handlers\TimedRotatingFileHandler, 继承自RotatingFileHandler
+属性:
+'logFile'=>'',// 日志文件
+'rotateMode'=>'d',// 日志轮转模式,支持d(天),h(小时),m(月),s(分钟),w(周),y(年),默认为d,表示按天轮转
+'rotatefmt'=>'{filename}_{date:YmdHi}_hehe',// 轮转文件格式,变量可以取自日志上下文, filename:当前日志文件名 ,date:为当前日期,"YmdHis" 日期格式
+'rotatefmtParams'=>['filename'=>'\w+'],// 轮转文件格式参数,可设置变量的正则表达式
+'maxFile'=>0,// 最大文件数量,默认为0,表示不限制'
+'maxByte'=>0,// 最大文件容量,单kb,日志文件超过该值时,将创建新的日志文件
+'backupCount'=>0,// 最大备份文件数量,默认为0,表示不限制
+'backupfmt'=>'{filename}_up{index}',// 备份文件格式,变量可以取自日志上下文, filename:当前轮转文件名 ,index:自增序号 日期格式
+'backupfmtParams'=>['index'=>'\d+'],// 备份文件格式参数,可设置变量的正则表达式
+```
+
+- 示例代码
+```php
+use hehe\core\hlogger\LogManager;
+$hlog = new LogManager();
+$logger = $hlog->newLogger();
+$timedRotatingFileHandler = $logger->timedRotatingFileHandler('/home/hehe/www/logs/hehep.log','s');
+$timedRotatingFileHandler->setMaxFiles(2);
+$timedRotatingFileHandler->setRotatefmt('{filename}_{date:YmdHi}_hehe');
+// $timedRotatingFileHandler->setRotatefmt('{date:Ym/d/H/}{filename}_{date:YmdHi}_hehe'); 目录日期格式
+$timedRotatingFileHandler->setMaxByte(10);
+$timedRotatingFileHandler->setBackupCount(4);
+$logger->addHandler($timedRotatingFileHandler);
+$logger->setFormatter($logger->lineFormatter('{date:Y-m-d:H:i},{level},{msg} ,file:{file}, line:{line} {n}'));
+$logger->error("default logger error message");
+
 ```
 
 ## 日志过滤器
@@ -641,6 +676,7 @@ class LineContext extends LogContext
 ### 日志上下文示例代码
 ```php
 use hehe\core\hlogger\LogManager;
+use \hehe\core\hlogger\contexts\TraceContext;
 $hlog = new LogManager();
 $logger = $hlog->newLogger();
 // 创建单行字符串日志格式器
@@ -658,6 +694,7 @@ $logger->addContext($traceContext);
 // new TraceContext 上下文
 $traceContext = new \hehe\core\hlogger\contexts\TraceContext();
 $logger->addContext($traceContext);
+$logger->addContext(TraceContext::class);
 
 // 添加闭包上下文
 $logger->addContext(function(){

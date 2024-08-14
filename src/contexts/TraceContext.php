@@ -65,11 +65,10 @@ class TraceContext extends LogContext
         }
 
         $ctx = [
-            'file'      => isset($trace[$i - 1]['file']) ? $trace[$i - 1]['file'] : '',
-            'line'      => isset($trace[$i - 1]['line']) ? $trace[$i - 1]['line'] : '',
-            'class'     => isset($trace[$i]['class']) ? $trace[$i]['class'] : '',
-            'fn'  => isset($trace[$i]['function']) ? $trace[$i]['function'] : '',
-            'n'=>"\n",
+            'file' => isset($trace[$i - 1]['file']) ? $trace[$i - 1]['file'] : '',
+            'line' => isset($trace[$i - 1]['line']) ? $trace[$i - 1]['line'] : '',
+            'class' => isset($trace[$i]['class']) ? $trace[$i]['class'] : '',
+            'fn' => isset($trace[$i]['function']) ? $trace[$i]['function'] : '',
         ];
 
         return $ctx;

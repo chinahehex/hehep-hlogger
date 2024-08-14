@@ -9,9 +9,7 @@ use hehe\core\hlogger\base\LogContext;
 class SysContext extends LogContext
 {
 
-    protected $fields = [
-
-    ];
+    protected $fields = [];
 
     public function __construct(array $attrs = [])
     {
@@ -19,11 +17,15 @@ class SysContext extends LogContext
 
         $this->fields = [
             'pid' => [$this, 'getPid'],
+            'date' => [$this, 'getDate'],
+            'rand' => [$this, 'getRand'],
+            'time' => [$this, 'getTime'],
             'maxMemory'  => [$this, 'getMaxMemory'],
             'useMemory' => [$this, 'getUseMemory'],
+            'n'=>"\n",
         ];
     }
-    
+
     protected function getCtxData():array
     {
         $ctx = [];
@@ -41,6 +43,25 @@ class SysContext extends LogContext
     public function getPid():int
     {
         return getmypid();
+    }
+
+    public function getRand(int $num = 6):int
+    {
+        $num = !empty($num) ? (int)$num : 6 ;
+        $min = pow(10, $num - 1);
+        $max = pow(10, $num) - 1;
+
+        return mt_rand($min,$max);
+    }
+
+    public function getDate(string $dateFormat = 'Y-m-d H:i:s'):string
+    {
+        return date($dateFormat,time());
+    }
+
+    public function getTime():int
+    {
+        return time();
     }
 
     public function getMaxMemory():string

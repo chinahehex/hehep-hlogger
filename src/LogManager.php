@@ -11,7 +11,7 @@ use hehe\core\hlogger\filters\LevelFilter;
 use hehe\core\hlogger\formatters\LineFormatter;
 use hehe\core\hlogger\handlers\ByteRotatingFileHandler;
 use hehe\core\hlogger\handlers\FileHandler;
-use Psr\Log\LogLevel;
+use hehe\core\hlogger\handlers\TimedRotatingFileHandler;
 
 
 /**
@@ -22,6 +22,7 @@ use Psr\Log\LogLevel;
  *</pre>
  * @method FileHandler fileHandler(string $logFile = '')
  * @method ByteRotatingFileHandler byteRotatingFileHandler(string $logFile = '',int $maxByte = 0)
+ * @method TimedRotatingFileHandler timedRotatingFileHandler(string $logFile = '',string $rotateMode = '',int $interval = 0)
  * @method LineFormatter lineFormatter(string $tpl = '')
  * @method LevelFilter  levelFilter(string $levels  = '')
  */
@@ -76,6 +77,10 @@ class LogManager
         self::DEFAULT_NMAE =>[
             'class'=>'TraceContext'
         ],
+
+        'sys' =>[
+            'class'=>'SysContext'
+        ],
     ];
 
     /**
@@ -102,7 +107,7 @@ class LogManager
             'handlers'=>['default'],
             'filters'=>['default'],
             'formatter'=>'default',
-            'contexts'=>['default'],
+            'contexts'=>['default','sys'],
         ]
     ];
 
@@ -189,6 +194,7 @@ class LogManager
         $this->getDefaultLogger()->log($level,$message,$context);
     }
 
+
     public function getLogger(string $name):Logger
     {
         if (isset($this->_loggers[$name])) {
@@ -259,6 +265,8 @@ class LogManager
             $attrs = $name;
         } else if (isset($this->handlers[$name]))  {
             $attrs = $this->handlers[$name];
+        } else if (strpos($name,'\\') !== false) {
+            $attrs['class'] = $name;
         }
 
         $attrs = $this->buildHandlerPropertys($attrs);
@@ -314,6 +322,8 @@ class LogManager
             $attrs = $name;
         } else if (isset($this->formatters[$name]))  {
             $attrs = $this->formatters[$name];
+        } else if (strpos($name,'\\') !== false) {
+            $attrs['class'] = $name;
         }
 
         // 实例化对象
@@ -345,6 +355,8 @@ class LogManager
             $attrs = $name;
         } else if (isset($this->filters[$name]))  {
             $attrs = $this->filters[$name];
+        } else if (strpos($name,'\\') !== false) {
+            $attrs['class'] = $name;
         }
 
         // 实例化对象
@@ -375,6 +387,8 @@ class LogManager
             $attrs = $name;
         } else if (isset($this->contexts[$name]))  {
             $attrs = $this->contexts[$name];
+        } else if (strpos($name,'\\') !== false) {
+            $attrs['class'] = $name;
         }
 
         // 实例化对象
@@ -399,7 +413,7 @@ class LogManager
      * @param string $name 格式器名称
      * @param bool $append 是否追加
      */
-    public function setFormatter(array $attrs = [],string $name = self::DEFAULT_NMAE,bool $append = true):self
+    public function setFormatter(string $name,array $attrs = [],bool $append = true):self
     {
         if (isset($this->formatters[$name])) {
             if ($append) {
@@ -420,7 +434,7 @@ class LogManager
      * @param string $name 过滤器名称
      * @param bool $append 是否追加
      */
-    public function setFilter(array $attrs = [],string $name = self::DEFAULT_NMAE,bool $append = true):self
+    public function setFilter(string $name,array $attrs = [],bool $append = true):self
     {
         if (isset($this->filters[$name])) {
             if ($append) {
@@ -441,7 +455,7 @@ class LogManager
      * @param string $name 处理器名称
      * @param bool $append 是否追加
      */
-    public function setHandler(array $attrs = [],string $name = self::DEFAULT_NMAE,bool $append = true):self
+    public function setHandler(string $name,array $attrs = [],bool $append = true):self
     {
         if (isset($this->handlers[$name])) {
             if ($append) {
@@ -462,7 +476,7 @@ class LogManager
      * @param string $name 上下文名称
      * @param bool $append 是否追加
      */
-    public function setContext(array $attrs = [],string $name = self::DEFAULT_NMAE,bool $append = true):self
+    public function setContext(string $name,array $attrs = [],bool $append = true):self
     {
         if (isset($this->contexts[$name])) {
             if ($append) {
@@ -475,13 +489,25 @@ class LogManager
         }
 
         return $this;
-
-        return $this;
     }
 
-    public function setLogger(string $name,array $attrs = []):self
+    /**
+     * 注册上下文
+     * @param array $attrs 属性配置
+     * @param string $name 上下文名称
+     * @param bool $append 是否追加
+     */
+    public function setLogger(string $name,array $attrs = [],bool $append = true):self
     {
-        $this->loggers[$name] = $attrs;
+        if (isset($this->loggers[$name])) {
+            if ($append) {
+                $this->loggers[$name] = array_merge($this->loggers[$name],$attrs);
+            } else {
+                $this->loggers[$name] = $attrs;
+            }
+        } else {
+            $this->loggers[$name] = $attrs;
+        }
 
         return $this;
     }

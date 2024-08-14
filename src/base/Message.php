@@ -48,9 +48,15 @@ class Message
      *<pre>
      *  略
      *</pre>
-     * @var string
+     * @var Context
      */
     protected $context;
+
+    /**
+     * 消息上下文
+     * @var Context
+     */
+    protected $msgContext;
 
     /**
      * @var LogFormatter
@@ -89,11 +95,12 @@ class Message
             }
         }
 
-        $this->context['level'] = $this->level;
-        $this->context['cate'] = $this->category;
-        $this->context['msg'] = [$this,'getMsg'];
-        $this->context['time'] = [$this,'getTime'];
-        $this->context['date'] = [$this,'getDate'];
+        $this->context->addValue('level',$this->level);
+        $this->context->addValue('cate',$this->category);
+        $this->context->addValue('msg',[$this,'getMsg']);
+        $this->context->addValue('mdate',[$this,'getDate']);
+        $this->context->addValue('mtime',[$this,'getTime']);
+
     }
 
     public function getLevel():string
@@ -115,12 +122,12 @@ class Message
         return date($dateFormat,$this->time);
     }
 
-    public function getTime():string
+    public function getTime()
     {
         return $this->time;
     }
 
-    public function getDataTime()
+    public function getDataTime():\DateTime
     {
         $dateTime = new \DateTime();
         $dateTime->setTimestamp($this->time);
@@ -130,12 +137,12 @@ class Message
 
     public function getClass():string
     {
-        return isset($this->context['class']) ? $this->context['class'] : '';
+        return $this->context->getValue('class');
     }
 
     public function getFun():string
     {
-        return isset($this->context['fn']) ? $this->context['fn'] : '';
+        return $this->context->getValue('fn');
     }
 
     public function getCategory():string
@@ -145,7 +152,7 @@ class Message
 
     public function getContext():Context
     {
-        return new Context($this->context);
+        return $this->context;
     }
 
     public function getFormatter():LogFormatter
