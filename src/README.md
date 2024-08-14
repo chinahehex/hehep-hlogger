@@ -198,12 +198,12 @@ $heheLogger->error('error log message');
 ## 日志记录器
 - 说明
 ```
-日志记录器类:hehe\core\hlogger\base\Logger
+类名:hehe\core\hlogger\base\Logger
 作用:用于记录日志，可以设置日志级别,日志过滤器,日志处理器,
 属性:
 'bufferLimit'=>0,// 缓冲日志数量
 'handlers'=>['default'],// 日志处理器
-'levels'=>['info','error','warning','exception','debug'],// 设置允许的消息级别
+'levels'=>['info','error','warning','debug'],// 设置允许的消息级别
 'categorys'=>['admin\controller*'],// 设置允许的日志类别
 'filter'=>'info',// 定义过滤器
 'formatter'=>'default',// 定义日志格式器
@@ -224,7 +224,7 @@ $heheLogger = $hlog->newLogger('hehe');
 // 获取一个空的日志记录器对象
 $heheLogger = $hlog->newLogger();
 
-$heheLogger = $hlogger->newLogger([
+$heheLogger = $hlog->newLogger([
     'bufferLimit'=>2,
     'levels'=>'error,info',
     'categorys'=>'',// 'admin\controller*'
@@ -237,8 +237,7 @@ $filter = $hlog->levelFilter('error,info');
 $heheLogger->addFilter($filter);
 
 // 记录器新增日志处理器
-$file = 'user/xxx.log';
-$handler = $hlog->fileHandler($file); 
+$handler = $hlog->fileHandler('user/xxx.log'); 
 $heheLogger->addHandler($handler);
 
 // 设置记录器日志格式器
@@ -276,8 +275,16 @@ $context = $msg->getContext();
 // 获取上下文对象值
 $pid = $context->getValue('pid');
 
-// 获取uuid值
-$uuid = $context->addValue('uuid','getUuid');
+// 增加上下文对象值
+$context->addValue('username','hehe');
+$context->addValue('userid',function(){
+    // 获取用户id    
+});
+
+// $context->addValue('userid',['类对象','对象方法名']);
+
+// 获取用户传入的额外参数,如Log::error("error message",['id'=>1])
+$context->getExtra();
 
 ```
 
@@ -285,7 +292,7 @@ $uuid = $context->addValue('uuid','getUuid');
 ## 日志处理器
 - 说明
 ```
-日志处理器基类:hehe\core\hlogger\handlers\LogHandler
+基类:hehe\core\hlogger\handlers\LogHandler
 作用:持久化日志信息，比如文件处理器,数据库处理器,邮件处理器等等
 全局属性:
 'filter'=>'',// 日志过滤器
@@ -353,13 +360,27 @@ class FileHandler extends LogHandler
     public function handleMessage(Message $message):void
     {
         // 获取格式化后消息
-        $log_str = $message->getMsg();
+        $log_format_msg = $message->getMessage();
+        
+        // 获取原始日志消息
+        $raw_msg = $message->getMsg();
         
         // 获取日志上下文对象
         $context = $message->getContext();
         
         // 获取当前进程ID
         $pid = $context->getValue('pid');
+        
+        // 增加上下文对象值
+        $context->addValue('username','hehe');
+        $context->addValue('userid',function(){
+            // 获取用户id    
+        });
+        
+        // $context->addValue('userid',['类对象','对象方法名']);
+        
+        // 获取用户传入的额外参数,如Log::error("error message",['id'=>1])
+        $context->getExtra();
        
     }
 }
@@ -421,7 +442,7 @@ $logger->info('info log message');
 属性:
 'logFile'=>'',// 日志文件
 'maxByte'=>0,// 最大文件容量,单kb,日志文件超过该值时,将创建新的日志文件
-'rotatefmt'=>'{filename}_{date:YmdHis}_{rand:6}',// 轮转文件格式,变量可以取自日志上下文, filename:当前日志文件名 ,date:为当前日期,"YmdHis" 日期格式,rand:为6位随机数
+'rotatefmt'=>'{filename}',// 轮转文件格式,变量可以取自日志上下文, filename:当前日志文件名
 'rotatefmtParams'=>['filename'=>'\w+'],// 轮转文件格式参数,可设置变量的正则表达式
 'backupCount'=>0,// 最大备份文件数量,默认为0,表示不限制
 'backupfmt'=>'{filename}_up{index}',// 备份文件格式,变量可以取自日志上下文, filename:当前轮转文件名 ,index:自增序号 日期格式
@@ -443,8 +464,8 @@ $handler = $hlog->byteRotatingFileHandler([
     'logFile'=>'/home/hehe/www/logs/hehep.log',
     // 最大文件容量,单kb,5M
     'maxByte'=>1024 * 5,
-    // filename:当前日志文件名 ,date:为当前日期,"YmdHis" 日期格式,rand:为6位随机数
-    'rotatefmt'=>'{filename}_{date:YmdHis}_{rand:6}',
+    // filename:当前日志文件名 ,date:为当前日期,"YmdHi" 日期格式
+    'rotatefmt'=>'{filename}_{date:YmdHi}',
 ]);
 
 $logger->addHandler($handler);
@@ -459,12 +480,14 @@ $logger->info('info log message');
 属性:
 'logFile'=>'',// 日志文件
 'rotateMode'=>'d',// 日志轮转模式,支持d(天),h(小时),m(月),s(分钟),w(周),y(年),默认为d,表示按天轮转
-'rotatefmt'=>'{filename}_{date:YmdHi}_hehe',// 轮转文件格式,变量可以取自日志上下文, filename:当前日志文件名 ,date:为当前日期,"YmdHis" 日期格式
+'rotatefmt'=>'{filename}_{date:YmdHi}_hehe',// 轮转文件格式,变量可以取自日志上下文, 
+            // filename:当前日志文件名 ,date:为当前日期,"YmdHi" 日期格式
 'rotatefmtParams'=>['filename'=>'\w+'],// 轮转文件格式参数,可设置变量的正则表达式
 'maxFile'=>0,// 最大文件数量,默认为0,表示不限制'
 'maxByte'=>0,// 最大文件容量,单kb,日志文件超过该值时,将创建新的日志文件
 'backupCount'=>0,// 最大备份文件数量,默认为0,表示不限制
-'backupfmt'=>'{filename}_up{index}',// 备份文件格式,变量可以取自日志上下文, filename:当前轮转文件名 ,index:自增序号 日期格式
+'backupfmt'=>'{filename}_up{index}',// 备份文件格式,变量可以取自日志上下文, 
+            // filename:当前轮转文件名 ,index:自增序号
 'backupfmtParams'=>['index'=>'\d+'],// 备份文件格式参数,可设置变量的正则表达式
 
 轮转文件名支持上下文变量,如:{filename}_{pid},pid:当前进程id
@@ -492,7 +515,7 @@ $logger->error("default logger error message");
 ## 日志过滤器
 - 说明
 ```
-日志过滤器基类:hehe\core\hlogger\base\LogFilter
+基类:hehe\core\hlogger\base\LogFilter
 作用:过滤日志消息，比如只记录error级别日志，或者只记录"admin\controller*"控制器的日志
 属性:
 'levels'=>'info,error',// 支持的日志级别
@@ -577,7 +600,7 @@ $logger->error('error log message');
 ## 日志格式器
 - 说明
 ```
-日志格式器基类:hehe\core\hlogger\base\LogFormatter
+基类:hehe\core\hlogger\base\LogFormatter
 作用:格式化日志消息，比如将日志消息转换为字符串  
 ```
   
@@ -651,10 +674,13 @@ $logger->error('error log message');
 
 ```
 
-### 日志消息转单行字符串格式器
+
+
+### 日志单行字符串格式器
 - 默认日志模版变量
 ```
-date:日志时间,基本格式:{date:Y-m-d:H:i}
+date:当前系统时间,基本格式:{date:Y-m-d:H:i:s}
+mdate:日志时间,基本格式:{date:Y-m-d:H:i:s}
 msg:日志内容,基本格式:{msg}
 level:日志级别,基本格式:{level}
 file:记录日志时的文件路径,基本格式:file}
@@ -680,10 +706,15 @@ $logger->setFormatter($lineFormatter);
 
 ```
 
+### 常用日期格式集合
+```
+
+```
+
 ## 日志上下文
 - 说明
 ```
-日志上下文基类:hehe\core\hlogger\base\LogContext
+基类:hehe\core\hlogger\base\LogContext
 作用:日志上下文,比如记录日志时的任务ID,用户ID等
 
 ```
