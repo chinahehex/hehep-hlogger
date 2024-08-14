@@ -87,6 +87,8 @@ $hlogger = new LogManager([]);
 // 记录日志
 $hlogger->info('info log message');
 $hlogger->error('error log message');
+
+Log::setHandler('default',['logFile'=>'/home/hehe/www/logs/hehep.log']);
 Log::info('info log message');
 Log::error('error log message');
 
@@ -95,7 +97,10 @@ Log::error('error log message');
 ## 日志管理器
 - 说明
 ```
-用于管理日志相关的操作,比如日志记录器,日志处理器,日志格式器,志过滤器的对象获取,以及日志的记录
+用于管理日志相关的操作,比如
+配置日志处理器,日志格式器,日志过滤器,日志记录器,
+创建日志记录器,日志处理器,日志格式器,志过滤器的对象,
+记录不同级别日志
 ```
 - 日志管理器示例
 ```php
@@ -181,7 +186,6 @@ $hlog->setLogger('hehe',[
 
 // 获取预定义hehe日志记录器单例对象
 $heheLogger = $hlog->getLogger('hehe');
-
 
 // 获取预定义hehe日志记录器新对象
 $heheLogger = $hlog->newLogger('hehe');
