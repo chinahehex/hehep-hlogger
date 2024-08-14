@@ -249,6 +249,39 @@ $heheLogger->info('info log message');
 
 ```
 
+## 日志消息对象
+- 说明
+```
+类名:hehe\core\hlogger\base\Message
+作用:用于存储日志消息,级别，上下文对象
+```
+
+- 示例代码
+```php
+use hehe\core\hlogger\base\Message;
+$msg = new Message();
+
+// 获取原始日志字符串
+$msg->getMsg();
+
+// 获取日志经过格式化处理后的日志字符串
+$msg->getMessage();
+
+// 获取日志级别
+$msg->getLevel();
+
+// 获取上下文对象
+$context = $msg->getContext();
+
+// 获取上下文对象值
+$pid = $context->getValue('pid');
+
+// 获取uuid值
+$uuid = $context->addValue('uuid','getUuid');
+
+```
+
+
 ## 日志处理器
 - 说明
 ```
@@ -321,6 +354,12 @@ class FileHandler extends LogHandler
     {
         // 获取格式化后消息
         $log_str = $message->getMsg();
+        
+        // 获取日志上下文对象
+        $context = $message->getContext();
+        
+        // 获取当前进程ID
+        $pid = $context->getValue('pid');
        
     }
 }
@@ -388,6 +427,8 @@ $logger->info('info log message');
 'backupfmt'=>'{filename}_up{index}',// 备份文件格式,变量可以取自日志上下文, filename:当前轮转文件名 ,index:自增序号 日期格式
 'backupfmtParams'=>['index'=>'\d+'],// 备份文件格式参数,可设置变量的正则表达式
 
+轮转文件名支持上下文变量,如:{filename}_{pid},pid:当前进程id
+备份文件名支持上下文变量,如:{filename}_{pid},pid:当前进程id
 ```
 
 - 示例代码
@@ -425,6 +466,10 @@ $logger->info('info log message');
 'backupCount'=>0,// 最大备份文件数量,默认为0,表示不限制
 'backupfmt'=>'{filename}_up{index}',// 备份文件格式,变量可以取自日志上下文, filename:当前轮转文件名 ,index:自增序号 日期格式
 'backupfmtParams'=>['index'=>'\d+'],// 备份文件格式参数,可设置变量的正则表达式
+
+轮转文件名支持上下文变量,如:{filename}_{pid},pid:当前进程id
+备份文件名支持上下文变量,如:{filename}_{pid},pid:当前进程id
+
 ```
 
 - 示例代码
@@ -612,7 +657,7 @@ $logger->error('error log message');
 date:日志时间,基本格式:{date:Y-m-d:H:i}
 msg:日志内容,基本格式:{msg}
 level:日志级别,基本格式:{level}
-file:记录日志时的文件路径,基本格式:$file}
+file:记录日志时的文件路径,基本格式:file}
 line:记录日志时的行数,基本格式:{line}
 class:记录日志时的类名,基本格式:{class}
 fn:记录日志时的方法名或函数名,基本格式:{fn}
@@ -712,6 +757,33 @@ $logger->addContext(function(){
 $logger->error('error log message',['goodid'=>'123']);
 
 ```
+
+### 默认上下文集合
+#### trace上下文
+- 说明
+```
+基类:hehe\core\hlogger\contexts\TraceContext
+变量:
+file:文件路径,基本格式:{file}
+line:行数,基本格式:{line}
+class:类名,基本格式:{class}
+fn:方法名,基本格式:{fn}
+```
+
+#### 系统上下文
+- 说明
+```
+基类:hehe\core\hlogger\contexts\SysContext
+变量:
+pid:进程ID,基本格式:{pid}
+tid:线程ID,基本格式:{tid}
+date:日期,基本格式:{date:Y-m-d:H:i}
+time:时间戳,微妙,基本格式:{time}
+maxMemory:最大内存,基本格式:{maxMemory}
+useMemory:内存,基本格式:{useMemory}
+n:换行符,'\n',基本格式:{n}
+```
+
     
 
 
