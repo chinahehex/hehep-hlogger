@@ -87,7 +87,7 @@ $hlogger = new LogManager([]);
 // 记录日志
 $hlogger->info('info log message');
 $hlogger->error('error log message');
-
+// 设置默认"default"处理器参数
 Log::setHandler('default',['logFile'=>'/home/hehe/www/logs/hehep.log']);
 Log::info('info log message');
 Log::error('error log message');
