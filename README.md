@@ -512,6 +512,58 @@ $logger->error("default logger error message");
 
 ```
 
+#### 扩展文件轮转处理器
+- 说明
+```php
+继承:hehe\core\hlogger\handlers\RotatingFileHandler;
+属性:
+'logFile'=>'',// 日志文件
+'rotating'=>null,// 轮转状态,true 表示正在轮转中(日志文件未生成)
+'maxFiles'=>0,// 最大文件数量,默认为0,表示不限制
+'rotatefmt'=>'',// 轮转文件格式,变量可以取自日志上下文,
+'rotatefmtParams'=>[],// 轮转文件格式参数,可设置变量的正则表达式
+'backupCount'=>0,// 最大备份文件数量,默认为0,表示不限制
+'backupfmt'=>'',// 备份文件格式,变量可以取自日志上下文,
+'backupfmtParams'=>[],// 备份文件格式参数,可设置变量的正则表达式
+
+```
+- 示例代码
+```php
+class TimedRotatingFileHandler extends RotatingFileHandler
+{
+    // 重写rotate 方法即可
+    public function rotate(Message $message):void
+    {
+        // 第一次轮转，初始化轮转时间，轮转文件
+        if ($this->rotateFile === '') {
+            // 首次轮转文件
+            $this->rotateFile($message);
+        }
+        
+        // 轮转条件
+        if ($message->getDataTime() > $this->endDate) {
+            $this->rotating = true;
+            // 轮转文件
+            $this->rotateFile($message);
+        }
+
+        // 备份轮转文件
+        if ($this->rotating === false && $this->maxByte > 0) {
+            clearstatcache();
+            if (@filesize($this->rotateFile) > ($this->maxByte * 1024)) {
+                // 备份轮转文件
+                $this->backupFile($message);
+            }
+        }
+
+        return ;
+        
+    }
+}
+
+
+```
+
 ## 日志过滤器
 - 说明
 ```
