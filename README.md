@@ -1,7 +1,7 @@
 # hehep-hlogger
 
 ## 介绍
-- hehep-hlogger 是一个PHP 日志工具组件
+- hehep-hlogger 是一个PHP 日志工具组件,仿python logging模块
 - 支持处理器、过滤器、格式器、上下文
 ## 安装
 - **gitee下载**:
@@ -407,7 +407,7 @@ $logger->error('error log message');
 
 ```
 
-### 默认处理器集合
+### 可用处理器集合
 #### 文件处理器
 - 说明
 ```
@@ -789,7 +789,7 @@ $logger->error('error log message',['goodid'=>'123']);
 
 ```
 
-### 默认上下文集合
+### 可用上下文集合
 #### trace上下文
 - 说明
 ```
