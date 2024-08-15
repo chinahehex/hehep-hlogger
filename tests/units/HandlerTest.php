@@ -7,7 +7,6 @@ use hlogger\tests\TestCase;
 
 class HandlerTest extends TestCase
 {
-    protected $file = 'D:\work\logs\logger\hehex.log';
 
     protected function tearDown()
     {
@@ -34,7 +33,7 @@ class HandlerTest extends TestCase
         }
     }
 
-    protected function totalLogFilesNum(string $file)
+    protected function getFiles(string $file)
     {
         if (empty($file)) {
             $path = dirname($this->file);
@@ -51,11 +50,18 @@ class HandlerTest extends TestCase
         $file_res = [];
         foreach ($files as $file) {
             if ($file->isDir()) {
+                continue;
             } else {
                 $file_res[] = $file;
             }
         }
 
+        return $file_res;
+    }
+
+    protected function totalLogFilesNum(string $file)
+    {
+        $file_res = $this->getFiles($file);
         return count($file_res);
     }
 
@@ -147,6 +153,72 @@ class HandlerTest extends TestCase
         }
         // 验证文件数量
         $this->assertTrue($this->totalLogFilesNum($this->file) == 4);
+    }
+
+    public function testTimedRotatingFileHandlerDay()
+    {
+        $logger = $this->logManager->getLogger('admin');
+        $timedRotatingFileHandler = $logger->timedRotatingFileHandler($this->file,'d');
+        $logger->addHandler($timedRotatingFileHandler);
+        $logger->setFormatter($logger->lineFormatter('{date:Y-m-d:H:i},{level},{msg} ,file:{file}, line:{line} {n}'));
+        $logger->error("default logger error message");
+        $content = file_get_contents(($this->getFiles($this->file))[0]);
+        $this->assertRegExp('/error/',$content);
+    }
+
+    public function testTimedRotatingFileHandlerHour()
+    {
+        $logger = $this->logManager->getLogger('admin');
+        $timedRotatingFileHandler = $logger->timedRotatingFileHandler($this->file,'h');
+        $logger->addHandler($timedRotatingFileHandler);
+        $logger->setFormatter($logger->lineFormatter('{date:Y-m-d:H:i},{level},{msg} ,file:{file}, line:{line} {n}'));
+        $logger->error("default logger error message");
+        $content = file_get_contents(($this->getFiles($this->file))[0]);
+        $this->assertRegExp('/error/',$content);
+    }
+
+    public function testTimedRotatingFileHandlerSec()
+    {
+        $logger = $this->logManager->getLogger('admin');
+        $timedRotatingFileHandler = $logger->timedRotatingFileHandler($this->file,'s');
+        $logger->addHandler($timedRotatingFileHandler);
+        $logger->setFormatter($logger->lineFormatter('{date:Y-m-d:H:i},{level},{msg} ,file:{file}, line:{line} {n}'));
+        $logger->error("default logger error message");
+        $content = file_get_contents(($this->getFiles($this->file))[0]);
+        $this->assertRegExp('/error/',$content);
+    }
+
+    public function testTimedRotatingFileHandlerW()
+    {
+        $logger = $this->logManager->getLogger('admin');
+        $timedRotatingFileHandler = $logger->timedRotatingFileHandler($this->file,'w');
+        $logger->addHandler($timedRotatingFileHandler);
+        $logger->setFormatter($logger->lineFormatter('{date:Y-m-d:H:i},{level},{msg} ,file:{file}, line:{line} {n}'));
+        $logger->error("default logger error message");
+        $content = file_get_contents(($this->getFiles($this->file))[0]);
+        $this->assertRegExp('/error/',$content);
+    }
+
+    public function testTimedRotatingFileHandlerM()
+    {
+        $logger = $this->logManager->getLogger('admin');
+        $timedRotatingFileHandler = $logger->timedRotatingFileHandler($this->file,'M');
+        $logger->addHandler($timedRotatingFileHandler);
+        $logger->setFormatter($logger->lineFormatter('{date:Y-m-d:H:i},{level},{msg} ,file:{file}, line:{line} {n}'));
+        $logger->error("default logger error message");
+        $content = file_get_contents(($this->getFiles($this->file))[0]);
+        $this->assertRegExp('/error/',$content);
+    }
+
+    public function testTimedRotatingFileHandlerY()
+    {
+        $logger = $this->logManager->getLogger('admin');
+        $timedRotatingFileHandler = $logger->timedRotatingFileHandler($this->file,'Y');
+        $logger->addHandler($timedRotatingFileHandler);
+        $logger->setFormatter($logger->lineFormatter('{date:Y-m-d:H:i},{level},{msg} ,file:{file}, line:{line} {n}'));
+        $logger->error("default logger error message");
+        $content = file_get_contents(($this->getFiles($this->file))[0]);
+        $this->assertRegExp('/error/',$content);
     }
 
 

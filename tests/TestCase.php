@@ -13,9 +13,14 @@ class TestCase extends \PHPUnit\Framework\TestCase
 
     protected $file = '';
 
+    protected $config = [];
+
     // 单个测试之前(每个测试方法之前调用)
     protected function setUp()
     {
+        $this->config = parse_ini_file(dirname(__DIR__) . '/test.ini');
+        $this->file = $this->config['logfile'];
+
         $attrs =  [
             'defaultLogger'=>"default",
             // 日志过滤器定义
@@ -63,6 +68,8 @@ class TestCase extends \PHPUnit\Framework\TestCase
         ];
 
         $this->logManager = new LogManager($attrs);
+
+
     }
 
     // 单个测试之后(每个测试方法之后调用)

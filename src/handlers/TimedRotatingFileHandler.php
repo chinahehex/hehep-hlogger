@@ -10,6 +10,7 @@ use hehe\core\hlogger\Utils;
  */
 class TimedRotatingFileHandler extends RotatingFileHandler
 {
+    protected $rotatefmt = '';
 
     /**
      * 轮转格式
@@ -63,27 +64,33 @@ class TimedRotatingFileHandler extends RotatingFileHandler
         // 转大写
         $rotateMode = strtoupper($this->rotateMode);
         $nowRotateDate = new \DateTime('now');
+        $defRotatefmt = '';
 
         if ($rotateMode === 'D') {
             // 天
             $startDate = (new \DateTime())->setTimestamp(strtotime("today"));
             $endDate = (new \DateTime())->setTimestamp( strtotime("tomorrow -1 second"));
+            $defRotatefmt = '{date:Y/m}/{filename}_{date:d}';
         } else if ($rotateMode === 'H') {
             // 小时
             $startDate = (new \DateTime())->setTimestamp(strtotime(date('Y-m-d H:00:00', $nowRotateDate->getTimestamp())));
             $endDate = (new \DateTime())->setTimestamp(strtotime(date('Y-m-d H:59:59', $nowRotateDate->getTimestamp())));
+            $defRotatefmt = '{date:Y/m/d}/{filename}_{date:H}';
         } else if ($rotateMode === 'S') {
             // 分钟
             $startDate = (new \DateTime())->setTimestamp(strtotime(date('Y-m-d H:i:00', $nowRotateDate->getTimestamp())));
             $endDate = (new \DateTime())->setTimestamp(strtotime(date('Y-m-d H:i:59', $nowRotateDate->getTimestamp())));
+            $defRotatefmt = '{date:Y/m/d/H}/{filename}_{date:i}';
         } else if ($rotateMode === 'W') {
             // 周
             $startDate = (new \DateTime())->setTimestamp(strtotime('monday this week 00:00:00', $nowRotateDate->getTimestamp()));
             $endDate = (new \DateTime())->setTimestamp(strtotime('monday next week 00:00:00', $nowRotateDate->getTimestamp()) - 1);
+            $defRotatefmt = '{date:Y}/{filename}_w{date:W}';
         } else if ($rotateMode === 'M') {
             // 月
             $startDate = (new \DateTime())->setTimestamp(strtotime(date('Y-m-01 00:00:00')));
             $endDate = (new \DateTime())->setTimestamp(strtotime(date('Y-m-t 23:59:59')));
+            $defRotatefmt = '{date:Y}/{filename}_{date:m}';
         } else if ($rotateMode === 'Y') {
             // 年
             $currentYear = date("Y");
@@ -93,6 +100,11 @@ class TimedRotatingFileHandler extends RotatingFileHandler
             $endOfYear = strtotime("+1 year", $startOfYear) - 1;
             $startDate = (new \DateTime())->setTimestamp($startOfYear);
             $endDate = (new \DateTime())->setTimestamp($endOfYear);
+            $defRotatefmt = '{filename}_{date:Y}';
+        }
+
+        if (empty($this->rotatefmt)) {
+            $this->rotatefmt = $defRotatefmt;
         }
 
         $this->startDate = $startDate;

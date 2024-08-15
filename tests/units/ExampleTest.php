@@ -6,7 +6,6 @@ use hlogger\tests\TestCase;
 
 class ExampleTest extends TestCase
 {
-    protected $file = 'D:\work\logs\hehex.log';
 
     protected function tearDown()
     {

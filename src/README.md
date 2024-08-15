@@ -811,7 +811,7 @@ tid:线程ID,基本格式:{tid}
 date:日期,基本格式:{date:Y-m-d:H:i}
 time:时间戳,微妙,基本格式:{time}
 maxMemory:最大内存,基本格式:{maxMemory}
-useMemory:内存,基本格式:{useMemory}
+useMemory:当前脚本占用的内存,基本格式:{useMemory}
 n:换行符,'\n',基本格式:{n}
 ```
 

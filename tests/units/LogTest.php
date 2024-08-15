@@ -5,7 +5,6 @@ use hlogger\tests\TestCase;
 
 class LogTest extends TestCase
 {
-    protected $file = 'D:\work\logs\hehex.log';
 
     protected function tearDown()
     {
@@ -110,7 +109,6 @@ class LogTest extends TestCase
 
     public function testNewLogger1()
     {
-        $file = 'D:\work\logs\logger2.log';
         $logger = Log::getLogger('admin');
 
         $logger->setBufferLimit(0);
@@ -119,7 +117,7 @@ class LogTest extends TestCase
             ->setLevel('error,warning');
 
         $handler = $logger->addHandler();
-        $handler->setLogFile($file);
+        $handler->setLogFile($this->file);
 
         $handler->setFormatter()->setTpl('{date:Y-m-d:H:i},{level} ,file:{file}, line:{line} {n}');
 
@@ -127,12 +125,12 @@ class LogTest extends TestCase
         $logger->warning("default logger warning message");
         $logger->notice("default logger notice message");
 
-        $content = file_get_contents($file);
+        $content = file_get_contents($this->file);
         $this->assertRegExp('/error/',$content);
         $this->assertRegExp('/warning/',$content);
         $this->assertNotRegExp('/notice/',$content);
 
-        $this->dellog($file);
+        //$this->dellog($file);
     }
 
     public function testAddFormatter()
