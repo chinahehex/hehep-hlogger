@@ -5,7 +5,7 @@ use hehe\core\hlogger\LogManager;
 use hehe\core\hlogger\Utils;
 
 /**
- * Class LogHandler
+ * 日志处理器基类
  */
 class LogHandler
 {
@@ -206,7 +206,6 @@ class LogHandler
         if (empty($this->categorys)) {
             return true;
         }
-
 
         $result = false;
         foreach ($this->categorys as $category) {

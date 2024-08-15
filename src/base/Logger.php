@@ -140,14 +140,10 @@ class Logger
             });
         }
 
-
         $this->setLevel($this->levels);
         $this->setCategory($this->categorys);
     }
 
-    /**
-     * @param array $levels
-     */
     public function setLevel($levels): self
     {
         if (is_string($levels)) {
@@ -168,8 +164,6 @@ class Logger
         return $this;
     }
 
-
-
     /**
      * 记录系统不可用日志
      * @param string $message
@@ -181,7 +175,7 @@ class Logger
     }
 
     /**
-     * 记录服务不可用日志
+     * 记录紧急日志
      * @param string $message
      * @param array $context
      */
@@ -299,7 +293,6 @@ class Logger
         return $this;
     }
 
-
     public function setFormatter($formatter = ''):self
     {
         if (is_string($formatter) ||  is_array($formatter)) {
@@ -411,7 +404,7 @@ class Logger
     }
 
     /**
-     * 是否需要写入日志
+     * 是否需要刷新日志
      *<B>说明：</B>
      *<pre>
      *  略
@@ -482,7 +475,7 @@ class Logger
     }
 
     /**
-     * 格式化上下文
+     * 获取日志上下文对象
      *<B>说明：</B>
      *<pre>
      * 略

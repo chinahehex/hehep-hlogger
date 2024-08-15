@@ -2,7 +2,7 @@
 namespace hehe\core\hlogger\base;
 
 /**
- * 日志过滤器
+ * 日志过滤器记录
  *<B>说明：</B>
  *<pre>
  *  略
@@ -20,7 +20,7 @@ abstract class LogFilter
         }
 
     }
-    
+
     /**
      * 日志是否通过过滤器
      *<B>说明：</B>

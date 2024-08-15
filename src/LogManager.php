@@ -30,7 +30,7 @@ class LogManager
 {
     const DEFAULT_NMAE = 'default';
 
-    public $relLog = true;
+    protected $bind = true;
 
 
     /**
@@ -130,7 +130,7 @@ class LogManager
         }
 
         // 是否关联日志快捷操作类
-        if ($this->relLog) {
+        if ($this->bind) {
             Log::$logManager = $this;
         }
 

@@ -51,13 +51,7 @@ class Message
      * @var Context
      */
     protected $context;
-
-    /**
-     * 消息上下文
-     * @var Context
-     */
-    protected $msgContext;
-
+    
     /**
      * @var LogFormatter
      */

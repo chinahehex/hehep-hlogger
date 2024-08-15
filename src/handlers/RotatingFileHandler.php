@@ -288,7 +288,7 @@ abstract class RotatingFileHandler extends FileHandler
     }
 
     /**
-     * 删除轮转文件
+     * 检测轮转文件数量限制
      */
     protected function checkRotateFileLimit():void
     {

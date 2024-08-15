@@ -48,7 +48,7 @@ class FileHandler extends LogHandler
         $this->logFile = $logFile;
     }
 
-    protected function createLogDir(string $logFile)
+    protected function createLogDir(string $logFile):void
     {
         if (!empty($this->dirCreated)) {
             return;
@@ -62,10 +62,6 @@ class FileHandler extends LogHandler
         $this->dirCreated = true;
     }
 
-    /**
-     * 日志写入文件
-     * @param string $file
-     */
     protected function writeFile(Message $message,string $file):void
     {
         // 消息写入文件

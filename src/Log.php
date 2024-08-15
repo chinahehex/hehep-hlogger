@@ -35,7 +35,7 @@ class Log
 {
 
     const EMERGENCY = 'emergency';// 系统不可用
-    const ALERT     = 'alert';
+    const ALERT     = 'alert';// 记录紧急日志
     const CRITICAL  = 'critical';// 严重错误
     const ERROR     = 'error';// 运行时错误，但是不需要立刻处理。
     const WARNING   = 'warning';// 出现非错误的异常

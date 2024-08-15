@@ -1,10 +1,8 @@
 <?php
 namespace hehe\core\hlogger\base;
 
-use hehe\core\hlogger\contexts\WebContext;
-
 /**
- * 上下文类
+ * 日志上下文类
  */
 class Context
 {

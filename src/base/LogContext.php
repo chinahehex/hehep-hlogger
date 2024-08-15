@@ -23,7 +23,7 @@ class LogContext
     protected function formatBytes($bytes)
     {
         $bytes = (int) $bytes;
-        
+
         if ($bytes > 1024 * 1024) {
             return round($bytes / 1024 / 1024, 2).' MB';
         } elseif ($bytes > 1024) {
@@ -39,7 +39,6 @@ class LogContext
      *<pre>
      * 略
      *</pre>
-     * @param array $ctx
      * @return array
      */
     public function handle():array
