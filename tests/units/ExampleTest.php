@@ -1,5 +1,6 @@
 <?php
 namespace hlogger\tests\units;
+use hehe\core\hlogger\base\Logger;
 use hehe\core\hlogger\handlers\FileHandler;
 use hehe\core\hlogger\Log;
 use hlogger\tests\TestCase;
@@ -265,6 +266,7 @@ class ExampleTest extends TestCase
     {
 
         $logger = $this->logManager->getLogger('admin');
+
         $fileHandler = $logger->fileHandler($this->file);
         $lineFormatter = $logger->lineFormatter('{date:Y-m-d:H:i},{level},{msg},file:{file}, line:{line} {n}');
         $fileHandler->setFormatter($lineFormatter);
