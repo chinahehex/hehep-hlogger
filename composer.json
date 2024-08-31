@@ -1,6 +1,6 @@
 {
 	"name": "hehex/hehep-hlogger",
-	"description": "hehep-hlogger 是一个PHP 日志工具组件,仿python logging模块,支持处理器、过滤器、格式器、上下文",
+	"description": "hehep-hlogger 是一个PHP日志基础组件,仿python logging模块,支持处理器、过滤器、格式器、上下文",
 	"license": "Apache-2.0",
 	"authors": [
 		{
