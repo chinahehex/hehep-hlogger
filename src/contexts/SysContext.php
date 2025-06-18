@@ -11,9 +11,9 @@ class SysContext extends LogContext
 
     protected $fields = [];
 
-    public function __construct(array $attrs = [])
+    public function __construct(array $config = [])
     {
-        parent::__construct($attrs);
+        parent::__construct($config);
 
         $this->fields = [
             'pid' => [$this, 'getPid'],

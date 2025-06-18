@@ -67,7 +67,7 @@ class Log
         static::$logger = null;
     }
 
-    public static function getLogManager(array $attrs = []):LogManager
+    public static function getLogManager(array $config = []):LogManager
     {
         return LogManager::make([
             'defaultLogger'=>static::$logger

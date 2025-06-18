@@ -6,12 +6,14 @@ use hehe\core\hlogger\base\LogFilter;
 use hehe\core\hlogger\base\LogFormatter;
 use hehe\core\hlogger\base\Logger;
 use hehe\core\hlogger\base\LogHandler;
+use hehe\core\hlogger\contexts\ExceptionContext;
 use hehe\core\hlogger\contexts\TraceContext;
 use hehe\core\hlogger\filters\LevelFilter;
 use hehe\core\hlogger\formatters\LineFormatter;
 use hehe\core\hlogger\handlers\ByteRotatingFileHandler;
 use hehe\core\hlogger\handlers\FileHandler;
 use hehe\core\hlogger\handlers\TimedRotatingFileHandler;
+use Psr\Log\LoggerInterface;
 
 
 /**
@@ -26,7 +28,7 @@ use hehe\core\hlogger\handlers\TimedRotatingFileHandler;
  * @method LineFormatter lineFormatter(string $tpl = '')
  * @method LevelFilter  levelFilter(string $levels  = '')
  */
-class LogManager
+class LogManager implements LoggerInterface
 {
     const DEFAULT_NMAE = 'default';
 
@@ -41,7 +43,7 @@ class LogManager
      *</pre>
      * @var array
      */
-    public $formatters = [
+    protected $formatters = [
         'default'=>['class'=>'LineFormatter']
     ];
 
@@ -53,7 +55,7 @@ class LogManager
      *</pre>
      * @var array
      */
-    public $filters = [
+    protected $filters = [
         self::DEFAULT_NMAE=>['class'=>'LevelFilter','levels'=>'*']
     ];
 
@@ -65,7 +67,7 @@ class LogManager
      *</pre>
      * @var array
      */
-    public $handlers = [
+    protected $handlers = [
         self::DEFAULT_NMAE =>['class'=>'FileHandler']
     ];
 
@@ -73,7 +75,7 @@ class LogManager
      * 上下文预定义
      * @var array
      */
-    public $contexts = [
+    protected $contexts = [
         self::DEFAULT_NMAE =>[
             'class'=>'TraceContext'
         ],
@@ -91,7 +93,7 @@ class LogManager
      *</pre>
      * @var string
      */
-    public $defaultLogger = self::DEFAULT_NMAE;
+    protected $defaultLogger = self::DEFAULT_NMAE;
 
     /**
      * logger 列表
@@ -101,7 +103,7 @@ class LogManager
      *</pre>
      * @var array
      */
-    public $loggers = [
+    protected $loggers = [
         self::DEFAULT_NMAE=>[
             'bufferLimit'=>0,
             'handlers'=>['default'],
@@ -121,79 +123,82 @@ class LogManager
      */
     protected $_loggers = [];
 
-    public function __construct(array $attrs = [])
+    public function __construct(array $config = [])
     {
-        if (!empty($attrs)) {
-            foreach ($attrs as $name=>$value) {
+        if (!empty($config)) {
+            foreach ($config as $name=>$value) {
                 $this->{$name} = $value;
             }
         }
 
         // 是否关联日志快捷操作类
-        if ($this->bind) {
-            Log::$logManager = $this;
-        }
-
+        Log::$logManager = $this;
     }
 
-    public static function make(array $attrs = [])
+    public function setDefaultLogger(string $name):self
     {
-        return new static($attrs);
+        $this->defaultLogger = $name;
+        return $this;
     }
 
-    public function emergency(string $message, array $context = []):void
+    public static function make(array $config = [])
+    {
+        return new static($config);
+    }
+
+    public function emergency($message, array $context = []):void
     {
         $this->log(Log::EMERGENCY,$message,$context);
     }
 
-    public function alert(string $message, array $context = [])
+    public function alert($message, array $context = []):void
     {
         $this->log(Log::ALERT,$message,$context);
     }
 
-    public function critical(string $message, array $context = [])
+    public function critical($message, array $context = []):void
     {
         $this->log(Log::CRITICAL,$message,$context);
     }
 
-    public function info(string $message, array $context = []):void
+    public function info($message, array $context = []):void
     {
 
         $this->log(Log::INFO,$message,$context);
     }
 
-    public function error(string $message, array $context = []):void
+    public function error($message, array $context = []):void
     {
-
         $this->log(Log::ERROR,$message,$context);
     }
 
-    public function warning(string $message, array $context = []):void
+    public function warning($message, array $context = []):void
     {
         $this->log(Log::WARNING,$message,$context);
     }
 
-    public function exception(string $message, array $context = []):void
+
+
+    public function debug($message, array $context = []):void
     {
         $this->log(Log::DEBUG,$message,$context);
     }
 
-    public function debug(string $message, array $context = []):void
-    {
-        $this->log(Log::DEBUG,$message,$context);
-    }
-
-    public function notice(string $message, array $context = []):void
+    public function notice($message, array $context = []):void
     {
         $this->log(Log::NOTICE,$message,$context);
     }
 
+    public function exception(string $message, \Throwable $context):void
+    {
+        $this->log(Log::ERROR,$message,(new ExceptionContext($context))->handle());
+    }
 
-    public function log(string $level,string $message,array $context = []):void
+
+    public function log($level,$message, array $context = []):void
     {
         $this->getDefaultLogger()->log($level,$message,$context);
     }
-
 
     public function getLogger(string $name):Logger
     {
@@ -209,7 +214,6 @@ class LogManager
 
     public function newLogger($name = ''):Logger
     {
-
         $loggerAttrs = [];
         if (!empty($name)) {
             if (is_string($name) && isset($this->loggers[$name])) {
@@ -409,20 +413,20 @@ class LogManager
 
     /**
      * 注册消息格式器
-     * @param array $attrs 属性配置
      * @param string $name 格式器名称
+     * @param array $config 属性配置
      * @param bool $append 是否追加
      */
-    public function setFormatter(string $name,array $attrs = [],bool $append = true):self
+    public function setFormatter(string $name,array $config = [],bool $append = true):self
     {
         if (isset($this->formatters[$name])) {
             if ($append) {
-                $this->formatters[$name] = array_merge($this->formatters[$name],$attrs);
+                $this->formatters[$name] = array_merge($this->formatters[$name],$config);
             } else {
-                $this->formatters[$name] = $attrs;
+                $this->formatters[$name] = $config;
             }
         } else {
-            $this->formatters[$name] = $attrs;
+            $this->formatters[$name] = $config;
         }
 
         return $this;
@@ -430,20 +434,20 @@ class LogManager
 
     /**
      * 注册消息过滤器
-     * @param array $attrs 属性配置
      * @param string $name 过滤器名称
+     * @param array $config 属性配置
      * @param bool $append 是否追加
      */
-    public function setFilter(string $name,array $attrs = [],bool $append = true):self
+    public function setFilter(string $name,array $config = [],bool $append = true):self
     {
         if (isset($this->filters[$name])) {
             if ($append) {
-                $this->filters[$name] = array_merge($this->filters[$name],$attrs);
+                $this->filters[$name] = array_merge($this->filters[$name],$config);
             } else {
-                $this->filters[$name] = $attrs;
+                $this->filters[$name] = $config;
             }
         } else {
-            $this->filters[$name] = $attrs;
+            $this->filters[$name] = $config;
         }
 
         return $this;
@@ -451,20 +455,20 @@ class LogManager
 
     /**
      * 注册处理器
-     * @param array $attrs 属性配置
      * @param string $name 处理器名称
+     * @param array $attrs 属性配置
      * @param bool $append 是否追加
      */
-    public function setHandler(string $name,array $attrs = [],bool $append = true):self
+    public function setHandler(string $name,array $config = [],bool $append = true):self
     {
         if (isset($this->handlers[$name])) {
             if ($append) {
-                $this->handlers[$name] = array_merge($this->handlers[$name],$attrs);
+                $this->handlers[$name] = array_merge($this->handlers[$name],$config);
             } else {
-                $this->handlers[$name] = $attrs;
+                $this->handlers[$name] = $config;
             }
         } else {
-            $this->handlers[$name] = $attrs;
+            $this->handlers[$name] = $config;
         }
 
         return $this;
@@ -472,20 +476,20 @@ class LogManager
 
     /**
      * 注册上下文
-     * @param array $attrs 属性配置
      * @param string $name 上下文名称
+     * @param array $config 属性配置
      * @param bool $append 是否追加
      */
-    public function setContext(string $name,array $attrs = [],bool $append = true):self
+    public function setContext(string $name,array $config = [],bool $append = true):self
     {
         if (isset($this->contexts[$name])) {
             if ($append) {
-                $this->contexts[$name] = array_merge($this->contexts[$name],$attrs);
+                $this->contexts[$name] = array_merge($this->contexts[$name],$config);
             } else {
-                $this->contexts[$name] = $attrs;
+                $this->contexts[$name] = $config;
             }
         } else {
-            $this->contexts[$name] = $attrs;
+            $this->contexts[$name] = $config;
         }
 
         return $this;
@@ -493,20 +497,20 @@ class LogManager
 
     /**
      * 注册上下文
-     * @param array $attrs 属性配置
      * @param string $name 上下文名称
+     * @param array $config 属性配置
      * @param bool $append 是否追加
      */
-    public function setLogger(string $name,array $attrs = [],bool $append = true):self
+    public function setLogger(string $name,array $config = [],bool $append = true):self
     {
         if (isset($this->loggers[$name])) {
             if ($append) {
-                $this->loggers[$name] = array_merge($this->loggers[$name],$attrs);
+                $this->loggers[$name] = array_merge($this->loggers[$name],$config);
             } else {
-                $this->loggers[$name] = $attrs;
+                $this->loggers[$name] = $config;
             }
         } else {
-            $this->loggers[$name] = $attrs;
+            $this->loggers[$name] = $config;
         }
 
         return $this;

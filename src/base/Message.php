@@ -38,7 +38,7 @@ class Message
      *<pre>
      *  略
      *</pre>
-     * @var string
+     * @var int
      */
     protected $time;
 
@@ -51,7 +51,7 @@ class Message
      * @var Context
      */
     protected $context;
-    
+
     /**
      * @var LogFormatter
      */
@@ -67,15 +67,15 @@ class Message
      */
     protected $category;
 
-    public function __construct($attrs = [])
+    public function __construct($config = [])
     {
-        if (!empty($attrs)) {
-            foreach ($attrs as $name => $value) {
+        if (!empty($config)) {
+            foreach ($config as $name => $value) {
                 $this->{$name} = $value;
             }
         }
 
-        $this->time = microtime(true);
+        $this->time = time();
 
         $class = $this->getClass();
         $func = $this->getFun();
@@ -116,7 +116,7 @@ class Message
         return date($dateFormat,$this->time);
     }
 
-    public function getTime()
+    public function getTime():int
     {
         return $this->time;
     }
@@ -166,7 +166,7 @@ class Message
         return !empty($this->formatter);
     }
 
-    public function getMsg()
+    public function getMsg():string
     {
         return $this->msg;
     }

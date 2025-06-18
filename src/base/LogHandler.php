@@ -51,10 +51,10 @@ class LogHandler
      */
     protected $logManager;
 
-    public function __construct(array $attrs = [])
+    public function __construct(array $config = [])
     {
-        if (!empty($attrs)) {
-            foreach ($attrs as $name => $value) {
+        if (!empty($config)) {
+            foreach ($config as $name => $value) {
                 $this->{$name} = $value;
             }
         }

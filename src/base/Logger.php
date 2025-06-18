@@ -1,6 +1,7 @@
 <?php
 namespace hehe\core\hlogger\base;
 
+use hehe\core\hlogger\contexts\ExceptionContext;
 use hehe\core\hlogger\contexts\SysContext;
 use hehe\core\hlogger\contexts\TraceContext;
 use hehe\core\hlogger\filters\LevelFilter;
@@ -123,10 +124,10 @@ class Logger
      */
     protected $logManager;
 
-    public function __construct(array $attrs = [])
+    public function __construct(array $config = [])
     {
-        if (!empty($attrs)) {
-            foreach ($attrs as $name => $value) {
+        if (!empty($config)) {
+            foreach ($config as $name => $value) {
                 $this->{$name} = $value;
             }
         }
@@ -244,7 +245,7 @@ class Logger
      *</pre>
      * @param string $level 日志级别
      * @param string $message 日志内容
-     * @param array $context 日志上下文
+     * @param array|\Throwable $context 日志上下文
      */
     public function log(string $level, string $message,array $context = []):void
     {
@@ -304,7 +305,7 @@ class Logger
         return $this;
     }
 
-    public function close()
+    public function close():void
     {
         foreach ($this->handlers as $handler) {
             if (method_exists($handler, 'close')) {
@@ -480,14 +481,12 @@ class Logger
      *<pre>
      * 略
      *</pre>
+     * @param array|\Throwable $customContext
      */
-    protected function getMsgContext(array $extra = []):Context
+    protected function getMsgContext($customContext = []):Context
     {
         $this->initDefaultContexts();
-
-        $ctx = [
-            'extra'=>$extra,
-        ];
+        $ctx = [];
         foreach ($this->contexts as $context) {
             if ($context instanceof LogContext) {
                 $vars = $context->handle();
@@ -500,7 +499,7 @@ class Logger
             $ctx = array_merge($ctx,$vars);
         }
 
-        return new Context($ctx);
+        return new Context(array_merge($ctx,$customContext));
     }
 
     public function __call($method, $params)

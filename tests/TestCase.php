@@ -16,7 +16,7 @@ class TestCase extends \PHPUnit\Framework\TestCase
     protected $config = [];
 
     // 单个测试之前(每个测试方法之前调用)
-    protected function setUp()
+    protected function setUp():void
     {
         $this->config = parse_ini_file(dirname(__DIR__) . '/test.ini');
         $this->file = $this->config['logfile'];
@@ -73,7 +73,7 @@ class TestCase extends \PHPUnit\Framework\TestCase
     }
 
     // 单个测试之后(每个测试方法之后调用)
-    protected function tearDown()
+    protected function tearDown():void
     {
         $this->logManager = null;
         if (file_exists($this->file)) {
@@ -90,13 +90,13 @@ class TestCase extends \PHPUnit\Framework\TestCase
     }
 
     // 整个测试类之前
-    public static function setUpBeforeClass()
+    public static function setUpBeforeClass():void
     {
 
     }
 
     // 整个测试类之前
-    public static function tearDownAfterClass()
+    public static function tearDownAfterClass():void
     {
 
     }

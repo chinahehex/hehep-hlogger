@@ -1,8 +1,9 @@
 # hehep-hlogger
 
 ## 介绍
-- hehep-hlogger 是一个PHP 日志工具组件,仿python logging模块
-- 支持处理器、过滤器、格式器、上下文
+> hehep-hlogger 是一个PHP 日志工具组件,仿python logging模块  
+> 支持处理器、过滤器、格式器、上下文  
+
 ## 安装
 - **gitee下载**:
 ```
@@ -19,10 +20,12 @@ composer require hehex/hehep-hlogger
 ```
 
 ## 组件配置
-```php
 
+```php
 $conf = [
-  'defaultLogger'=>"hehe",
+    
+    // 默认日志记录器名称
+    'defaultLogger'=>"hehe",
   
     // 预定义上下文
     'contexts'=>[
@@ -82,11 +85,11 @@ use hehe\core\hlogger\LogManager;
 use hehe\core\hlogger\Log;
 
 // 创建日志管理器
-$hlogger = new LogManager([]);
+$hlog = new LogManager([]);
 
 // 记录日志
-$hlogger->info('info log message');
-$hlogger->error('error log message');
+$hlog->info('info log message');
+$hlog->error('error log message');
 // 设置默认"default"处理器参数
 Log::setHandler('default',['logFile'=>'/home/hehe/www/logs/hehep.log']);
 Log::info('info log message');
@@ -95,14 +98,12 @@ Log::error('error log message');
 ```
 
 ## 日志管理器
-- 说明
-```
-用于管理日志相关的操作,比如
-配置日志处理器,日志格式器,日志过滤器,日志记录器,
-创建日志记录器,日志处理器,日志格式器,志过滤器的对象,
-记录不同级别日志
-```
-- 日志管理器示例
+> 用于管理日志相关的操作,比如  
+> 配置日志处理器,日志格式器,日志过滤器,日志记录器,  
+> 创建日志记录器,日志处理器,日志格式器,志过滤器的对象,  
+> 记录不同级别日志  
+
+### 日志管理器示例
 ```php
 use hehe\core\hlogger\LogManager;
 use hehe\core\hlogger\Log;
@@ -145,7 +146,7 @@ $heheLogger->error('error log message');
 
 ```
 
-- 预定义配置
+### 预定义配置
 ```php
 use hehe\core\hlogger\LogManager;
 use hehe\core\hlogger\Log;
@@ -196,20 +197,18 @@ $heheLogger->error('error log message');
 ```
 
 ## 日志记录器
-- 说明
-```
-类名:hehe\core\hlogger\base\Logger
-作用:用于记录日志，可以设置日志级别,日志过滤器,日志处理器,
-属性:
-'bufferLimit'=>0,// 缓冲日志数量
-'handlers'=>['default'],// 日志处理器
-'levels'=>['info','error','warning','debug'],// 设置允许的消息级别
-'categorys'=>['admin\controller*'],// 设置允许的日志类别
-'filter'=>'info',// 定义过滤器
-'formatter'=>'default',// 定义日志格式器
-```
+> 类名:hehe\core\hlogger\base\Logger  
+> 作用:用于记录日志，可以设置日志级别,日志过滤器,日志处理器  
+> 属性:  
+> 'bufferLimit'=>0,// 缓冲日志数量  
+> 'handlers'=>['default'],// 日志处理器  
+> 'levels'=>['info','error','warning','debug'],// 设置允许的消息级别  
+> 'categorys'=>['admin\controller*'],// 设置允许的日志类别  
+> 'filter'=>'info',// 定义过滤器  
+> 'formatter'=>'default',// 定义日志格式器  
 
-- 创建日志记录器
+
+### 创建日志记录器
 ```php
 use hehe\core\hlogger\LogManager;
 
@@ -249,13 +248,11 @@ $heheLogger->info('info log message');
 ```
 
 ## 日志消息对象
-- 说明
-```
-类名:hehe\core\hlogger\base\Message
-作用:用于存储日志消息,级别，上下文对象
-```
+> 类名:hehe\core\hlogger\base\Message  
+> 作用:用于存储日志消息,级别，上下文对象  
 
-- 示例代码
+
+### 示例代码
 ```php
 use hehe\core\hlogger\base\Message;
 $msg = new Message();
@@ -290,15 +287,11 @@ $context->getExtra();
 
 
 ## 日志处理器
-- 说明
-```
-基类:hehe\core\hlogger\handlers\LogHandler
-作用:持久化日志信息，比如文件处理器,数据库处理器,邮件处理器等等
-全局属性:
-'filter'=>'',// 日志过滤器
-'formatter'=>'',// 日志格式器
-
-```
+> 基类:hehe\core\hlogger\handlers\LogHandler  
+> 作用:持久化日志信息，比如文件处理器,数据库处理器,邮件处理器等等  
+> 全局属性:  
+> 'filter'=>'',// 日志过滤器  
+> 'formatter'=>'',// 日志格式器  
 
 ### 预定义处理器
 ```php
@@ -332,6 +325,7 @@ $conf = [
 ```
 
 ### 自定义处理器
+> 必须继承基类:hehe\core\hlogger\handlers\LogHandler,并实现方法:handleMessage()  
 ```php
 namespace hehe\core\hlogger\handlers;
 
@@ -381,7 +375,6 @@ class FileHandler extends LogHandler
         
         // 获取用户传入的额外参数,如Log::error("error message",['id'=>1])
         $context->getExtra();
-       
     }
 }
 ```
@@ -407,15 +400,11 @@ $logger->error('error log message');
 
 ```
 
-### 可用处理器集合
-#### 文件处理器
-- 说明
-```
-基类:hehe\core\hlogger\handlers\FileHandler
-属性:
-'logFile'=>'',// 日志文件
-'useLock'=>false,// 是否使用文件锁(flock),默认为false
-```
+### 文件处理器
+> 基类:hehe\core\hlogger\handlers\FileHandler  
+> 属性:    
+> 'logFile'=>'',// 日志文件  
+> 'useLock'=>false,// 是否使用文件锁(flock),默认为false  
 
 - 示例代码
 ```php
@@ -435,22 +424,20 @@ $logger->addHandler($handler);
 $logger->info('info log message');
 ```
 
-#### 文件大小轮转处理器
-- 说明
-```
-类名:hehe\core\hlogger\handlers\ByteRotatingFileHandler, 继承自RotatingFileHandler
-属性:
-'logFile'=>'',// 日志文件
-'maxByte'=>0,// 最大文件容量,单kb,日志文件超过该值时,将创建新的日志文件
-'rotatefmt'=>'{filename}',// 轮转文件格式,变量可以取自日志上下文, filename:当前日志文件名
-'rotatefmtParams'=>['filename'=>'\w+'],// 轮转文件格式参数,可设置变量的正则表达式
-'backupCount'=>0,// 最大备份文件数量,默认为0,表示不限制
-'backupfmt'=>'{filename}_up{index}',// 备份文件格式,变量可以取自日志上下文, filename:当前轮转文件名 ,index:自增序号 日期格式
-'backupfmtParams'=>['index'=>'\d+'],// 备份文件格式参数,可设置变量的正则表达式
+### 文件大小轮转处理器
+> 类名:hehe\core\hlogger\handlers\ByteRotatingFileHandler, 继承自RotatingFileHandler  
+> 属性:  
+>  'logFile'=>'',// 日志文件  
+>  'maxByte'=>0,// 最大文件容量,单kb,日志文件超过该值时,将创建新的日志文件  
+>  'rotatefmt'=>'{filename}',// 轮转文件格式,变量可以取自日志上下文, filename:当前日志文件名  
+>  'rotatefmtParams'=>['filename'=>'\w+'],// 轮转文件格式参数,可设置变量的正则表达式  
+>  'backupCount'=>0,// 最大备份文件数量,默认为0,表示不限制  
+>  'backupfmt'=>'{filename}_up{index}',// 备份文件格式,变量可以取自日志上下文, filename:当前轮转文件名 ,index:自增序号 日期格式  
+>  'backupfmtParams'=>['index'=>'\d+'],// 备份文件格式参数,可设置变量的正则表达式  
 
-轮转文件名支持上下文变量,如:{filename}_{pid},pid:当前进程id
-备份文件名支持上下文变量,如:{filename}_{pid},pid:当前进程id
-```
+> 轮转文件名支持上下文变量,如:{filename}_{pid},pid:当前进程id  
+> 备份文件名支持上下文变量,如:{filename}_{pid},pid:当前进程id  
+
 
 - 示例代码
 ```php
@@ -473,27 +460,24 @@ $logger->addHandler($handler);
 $logger->info('info log message');
 ```
 
-#### 文件日期轮转处理器
-- 说明
-```
-类名:hehe\core\hlogger\handlers\TimedRotatingFileHandler, 继承自RotatingFileHandler
-属性:
-'logFile'=>'',// 日志文件
-'rotateMode'=>'d',// 日志轮转模式,支持d(天),h(小时),m(月),s(分钟),w(周),y(年),默认为d,表示按天轮转
-'rotatefmt'=>'{filename}_{date:YmdHi}_hehe',// 轮转文件格式,变量可以取自日志上下文, 
-            // filename:当前日志文件名 ,date:为当前日期,"YmdHi" 日期格式
-'rotatefmtParams'=>['filename'=>'\w+'],// 轮转文件格式参数,可设置变量的正则表达式
-'maxFile'=>0,// 最大文件数量,默认为0,表示不限制'
-'maxByte'=>0,// 最大文件容量,单kb,日志文件超过该值时,将创建新的日志文件
-'backupCount'=>0,// 最大备份文件数量,默认为0,表示不限制
-'backupfmt'=>'{filename}_up{index}',// 备份文件格式,变量可以取自日志上下文, 
-            // filename:当前轮转文件名 ,index:自增序号
-'backupfmtParams'=>['index'=>'\d+'],// 备份文件格式参数,可设置变量的正则表达式
+### 文件日期轮转处理器
 
-轮转文件名支持上下文变量,如:{filename}_{pid},pid:当前进程id
-备份文件名支持上下文变量,如:{filename}_{pid},pid:当前进程id
+> 类名:hehe\core\hlogger\handlers\TimedRotatingFileHandler, 继承自RotatingFileHandler  
+> 属性:  
+> 'logFile'=>'',// 日志文件  
+> 'rotateMode'=>'d',// 日志轮转模式,支持d(天),h(小时),m(月),s(分钟),w(周),y(年),默认为d,表示按天轮转  
+> 'rotatefmt'=>'{filename}_{date:YmdHi}_hehe',// 轮转文件格式,变量可以取自日志上下文,   
+            // filename:当前日志文件名 ,date:为当前日期,"YmdHi" 日期格式  
+> 'rotatefmtParams'=>['filename'=>'\w+'],// 轮转文件格式参数,可设置变量的正则表达式  
+> 'maxFile'=>0,// 最大文件数量,默认为0,表示不限制'  
+> 'maxByte'=>0,// 最大文件容量,单kb,日志文件超过该值时,将创建新的日志文件  
+> 'backupCount'=>0,// 最大备份文件数量,默认为0,表示不限制  
+> 'backupfmt'=>'{filename}_up{index}',// 备份文件格式,变量可以取自日志上下文,   
+            // filename:当前轮转文件名 ,index:自增序号  
+> 'backupfmtParams'=>['index'=>'\d+'],// 备份文件格式参数,可设置变量的正则表达式  
 
-```
+> 轮转文件名支持上下文变量,如:{filename}_{pid},pid:当前进程id  
+> 备份文件名支持上下文变量,如:{filename}_{pid},pid:当前进程id  
 
 - 示例代码
 ```php
@@ -512,21 +496,18 @@ $logger->error("default logger error message");
 
 ```
 
-#### 扩展文件轮转处理器
-- 说明
-```php
-继承:hehe\core\hlogger\handlers\RotatingFileHandler;
-属性:
-'logFile'=>'',// 日志文件
-'rotating'=>null,// 轮转状态,true 表示正在轮转中(日志文件未生成)
-'maxFiles'=>0,// 最大文件数量,默认为0,表示不限制
-'rotatefmt'=>'',// 轮转文件格式,变量可以取自日志上下文,
-'rotatefmtParams'=>[],// 轮转文件格式参数,可设置变量的正则表达式
-'backupCount'=>0,// 最大备份文件数量,默认为0,表示不限制
-'backupfmt'=>'',// 备份文件格式,变量可以取自日志上下文,
-'backupfmtParams'=>[],// 备份文件格式参数,可设置变量的正则表达式
+### 扩展文件轮转处理器
+> 继承:hehe\core\hlogger\handlers\RotatingFileHandler  
+> 属性:  
+> 'logFile'=>'',// 日志文件  
+> 'rotating'=>null,// 轮转状态,true 表示正在轮转中(日志文件未生成)  
+> 'maxFiles'=>0,// 最大文件数量,默认为0,表示不限制  
+> 'rotatefmt'=>'',// 轮转文件格式,变量可以取自日志上下文,  
+> 'rotatefmtParams'=>[],// 轮转文件格式参数,可设置变量的正则表达式  
+> 'backupCount'=>0,// 最大备份文件数量,默认为0,表示不限制  
+> 'backupfmt'=>'',// 备份文件格式,变量可以取自日志上下文,  
+> 'backupfmtParams'=>[],// 备份文件格式参数,可设置变量的正则表达式  
 
-```
 - 示例代码
 ```php
 class TimedRotatingFileHandler extends RotatingFileHandler
@@ -565,14 +546,12 @@ class TimedRotatingFileHandler extends RotatingFileHandler
 ```
 
 ## 日志过滤器
-- 说明
-```
-基类:hehe\core\hlogger\base\LogFilter
-作用:过滤日志消息，比如只记录error级别日志，或者只记录"admin\controller*"控制器的日志
-属性:
-'levels'=>'info,error',// 支持的日志级别
-'categorys'=>['admin\controller*'],// 支持的日志分类
-```
+> 基类:hehe\core\hlogger\base\LogFilter  
+> 作用:过滤日志消息，比如只记录error级别日志，或者只记录"admin\controller*"控制器的日志  
+> 属性:  
+> 'levels'=>'info,error',// 支持的日志级别  
+> 'categorys'=>['admin\controller*'],// 支持的日志分类  
+
 
 ### 预定义过滤器
 ```php
@@ -597,6 +576,7 @@ $conf = [
 ```
 
 ### 自定义过滤器
+> 必须继承基类:hehe\core\hlogger\base\LogFilter,并重写check方法  
 ```php
 namespace hehe\core\hlogger\filters;
 
@@ -650,12 +630,9 @@ $logger->error('error log message');
 ```
 
 ## 日志格式器
-- 说明
-```
-基类:hehe\core\hlogger\base\LogFormatter
-作用:格式化日志消息，比如将日志消息转换为字符串  
-```
-  
+> 基类:hehe\core\hlogger\base\LogFormatter  
+> 作用:格式化日志消息，比如将日志消息转换为字符串    
+
 ### 预定义日志格式器
 ```php
 $conf = [
@@ -700,7 +677,7 @@ class LineFormatter extends LogFormatter
 }
 ```
 
-### 创建格式器器对象
+### 创建格式器对象
 ```php
 use hehe\core\hlogger\LogManager;
 
@@ -726,9 +703,7 @@ $logger->error('error log message');
 
 ```
 
-
-
-### 日志单行字符串格式器
+### 单行字符串日志格式器
 - 默认日志模版变量
 ```
 date:当前系统时间,基本格式:{date:Y-m-d:H:i:s}
@@ -758,11 +733,6 @@ $logger->setFormatter($lineFormatter);
 
 ```
 
-### 常用日期格式集合
-```
-
-```
-
 ## 日志上下文
 - 说明
 ```
@@ -787,6 +757,7 @@ $conf = [
 ```
 
 ### 自定义日志上下文
+> 必须继承基类:hehe\core\hlogger\base\LogContext,并重写handle方法  
 ```php
 namespace hehe\core\hlogger\contexts;
 
@@ -805,7 +776,7 @@ class LineContext extends LogContext
 
 ```
 
-### 日志上下文示例代码
+### 日志上下文示例
 ```php
 use hehe\core\hlogger\LogManager;
 use \hehe\core\hlogger\contexts\TraceContext;
@@ -841,31 +812,24 @@ $logger->error('error log message',['goodid'=>'123']);
 
 ```
 
-### 可用上下文集合
-#### trace上下文
-- 说明
-```
-基类:hehe\core\hlogger\contexts\TraceContext
-变量:
-file:文件路径,基本格式:{file}
-line:行数,基本格式:{line}
-class:类名,基本格式:{class}
-fn:方法名,基本格式:{fn}
-```
+### trace上下文
+> 基类:hehe\core\hlogger\contexts\TraceContext  
+> 变量:  
+> file:文件路径,基本格式:{file}  
+> line:行数,基本格式:{line}  
+> class:类名,基本格式:{class}  
+> fn:方法名,基本格式:{fn}  
 
-#### 系统上下文
-- 说明
-```
-基类:hehe\core\hlogger\contexts\SysContext
-变量:
-pid:进程ID,基本格式:{pid}
-tid:线程ID,基本格式:{tid}
-date:日期,基本格式:{date:Y-m-d:H:i}
-time:时间戳,微妙,基本格式:{time}
-maxMemory:最大内存,基本格式:{maxMemory}
-useMemory:当前脚本占用的内存,基本格式:{useMemory}
-n:换行符,'\n',基本格式:{n}
-```
+### 系统上下文
+> 基类:hehe\core\hlogger\contexts\SysContext  
+> 变量:  
+> pid:进程ID,基本格式:{pid}  
+> tid:线程ID,基本格式:{tid}  
+> date:日期,基本格式:{date:Y-m-d:H:i}  
+> time:时间戳,微妙,基本格式:{time}  
+> maxMemory:最大内存,基本格式:{maxMemory}  
+> useMemory:当前脚本占用的内存,基本格式:{useMemory}  
+> n:换行符,'\n',基本格式:{n}  
 
     
 

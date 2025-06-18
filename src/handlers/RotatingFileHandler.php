@@ -211,28 +211,44 @@ abstract class RotatingFileHandler extends FileHandler
             return $this->nextIndex;
         }
 
+        $maxIndex = null;
         if (count($backFiles) === 1) {
-            $lastFile = basename($backFiles[0]);
+            if (preg_match($this->backupfmtPattern, basename($backFiles[0]), $matches) !== false) {
+                $maxIndex = (int)$matches['index'];
+            }
         } else {
-            $backupfmtPattern = $this->backupfmtPattern;
-            usort($backFiles, function ($filea, $fileb) use($backupfmtPattern) {
-                preg_match($backupfmtPattern, basename($filea), $fileaMatches);
-                preg_match($backupfmtPattern, basename($fileb), $filebMatches);
-                return (int)$fileaMatches['index'] < (int)$filebMatches['index'];
-            });
-
-            $lastFile = basename($backFiles[0]);
+            $maxIndex = $this->findMaxIndex($backFiles,$this->backupfmtPattern);
         }
 
-        // 匹配最大文件索引
-        if (!preg_match($this->backupfmtPattern, $lastFile, $matches)) {
+
+
+        if (is_null($maxIndex)) {
             return $this->nextIndex;
+        } else {
+            return $maxIndex + 1;
+        }
+    }
+
+    /**
+     * 从文件中获取最大索引
+     * @param array $files
+     * @param string $pattern
+     * @return int|null
+     */
+    protected function findMaxIndex(array $files,string $pattern):?int
+    {
+        $fileIndexs = [];
+        foreach ($files as $file) {
+            if (preg_match($pattern, basename($file), $matches) !== false) {
+                $fileIndexs[] = (int)$matches['index'];
+            }
         }
 
-        if (isset($matches["index"])) {
-            return (int)$matches["index"] + 1;
+        if (!empty($fileIndexs)) {
+            rsort($fileIndexs);
+            return $fileIndexs[0];
         } else {
-            return $this->nextIndex;
+            return null;
         }
     }
 
@@ -269,13 +285,8 @@ abstract class RotatingFileHandler extends FileHandler
             return;
         }
 
-        // 按创建时间降序排序
-        $backupfmtPattern = $this->backupfmtPattern;
-        usort($logFiles, function ($filea, $fileb) use($backupfmtPattern) {
-            preg_match($backupfmtPattern, basename($filea), $fileaMatches);
-            preg_match($backupfmtPattern, basename($fileb), $fileMmatches);
-            return (int)$fileaMatches['index'] < (int)$fileMmatches['index'];
-        });
+        // 按文件序号降序排序
+        $logFiles = $this->sortLogFiles($logFiles,$this->backupfmtPattern);
 
         // 删除最旧的文件
         foreach (array_slice($logFiles, $this->backupCount) as $file) {
@@ -285,6 +296,31 @@ abstract class RotatingFileHandler extends FileHandler
                 restore_error_handler();
             }
         }
+    }
+
+    protected function sortLogFiles(array $logFiles,string $pattern,string $sort = 'desc'):array
+    {
+        $fileIndexs = [];
+        $fileIndexMap = [];
+        foreach ($logFiles as $file) {
+            if (preg_match($pattern, basename($file), $matches) !== false) {
+                $fileIndexs[] = (int)$matches['index'];
+                $fileIndexMap[$matches['index']] = $file;
+            }
+        }
+
+        if ($sort === 'desc') {
+            rsort($fileIndexs);
+        } else {
+            sort($fileIndexs);
+        }
+
+        $files = [];
+        foreach ($fileIndexs as $index) {
+            $files[] = $fileIndexMap[$index];
+        }
+
+        return $files;
     }
 
     /**
@@ -382,8 +418,8 @@ abstract class RotatingFileHandler extends FileHandler
         $rotateRegParams = [];
         foreach ($this->rotatefmtVars as $var) {
             list($name,$key) = $var;
-            $pattern = $this->rotatefmtParams[$name];
             if (isset($this->rotatefmtParams[$name])) {
+                $pattern = $this->rotatefmtParams[$name];
                 $rotateRegParams[$key] = "(?P<$name>$pattern)";
             } else {
                 $rotateRegParams[$key] = "(?P<$name>.*)";

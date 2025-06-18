@@ -15,9 +15,7 @@ class WebContext extends LogContext
      */
     protected $webData;
 
-    protected $fields = array(
-
-    );
+    protected $fields = [];
 
     public function __construct(array $webData = [])
     {

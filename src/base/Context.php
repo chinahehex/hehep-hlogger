@@ -54,7 +54,7 @@ class Context
         return $value;
     }
 
-    public function getAll()
+    public function getAll():array
     {
         $ctx = [];
         foreach ($this->ctx as $name=>$value) {
